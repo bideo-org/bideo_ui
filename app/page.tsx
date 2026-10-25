@@ -8,19 +8,41 @@ import ExploreClient from "@/components/explore/ExploreClient";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Zap, ShieldCheck, Video, HelpCircle } from "lucide-react";
 
+import { POPULAR_SEO_TOPICS } from "@/constants/seoKeywords";
+
 export const revalidate = 60; // Incremental Static Regeneration every 60s
 
 export const metadata: Metadata = {
-  title: "BuzzClips - Stream Trending Video Clips, Creator Shorts & Entertainment",
+  title: "BuzzClips - Free Video Streaming Website, Indian TV & Creator Clips",
   description:
-    "Watch, share, and stream trending video clips, gaming highlights, tech tutorials, and viral entertainment on BuzzClips. Adaptive HLS playback with zero lag.",
+    "Watch free video streaming, Indian TV live, trending viral clips, gaming highlights, tech tutorials, and reels on BuzzClips. Zero-lag adaptive HLS playback with zero buffering.",
+  keywords: [
+    "video streaming website",
+    "free video streaming",
+    "indian tv",
+    "free indian tv",
+    "watch indian tv online free",
+    "buzzclips",
+    "buzzclips tv",
+    "buzzclips live tv",
+    "live indian tv",
+    "dd sports live streaming",
+    "dd national live stream",
+    "dd news live streaming",
+    "viral video clips",
+    "watch reels online free",
+    "free ott platform",
+    "buffer free video streaming",
+    "hindi live tv",
+    "free live tv india",
+  ],
   alternates: {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: "BuzzClips - Stream Trending Video Clips & Creator Shorts",
+    title: "BuzzClips - Free Video Streaming Website & Indian Live TV",
     description:
-      "Watch trending videos, creator clips, and high-speed streaming on BuzzClips with adaptive HLS video playback.",
+      "Watch free video streaming, Indian TV live, creator clips, and viral shorts on BuzzClips with adaptive HLS video playback.",
     url: SITE_URL,
     type: "website",
     images: [
@@ -28,15 +50,15 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BuzzClips - Next-Gen Video Streaming Platform",
+        alt: "BuzzClips - Free Video Streaming & Indian Live TV Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BuzzClips - Stream Trending Video Clips & Creator Shorts",
+    title: "BuzzClips - Free Video Streaming & Indian Live TV",
     description:
-      "Watch trending videos, creator clips, and high-speed streaming on BuzzClips.",
+      "Watch free video streaming, Indian TV live, and viral creator clips on BuzzClips.",
     images: [`${SITE_URL}/opengraph-image`],
   },
 };
@@ -69,11 +91,19 @@ function ExploreSkeleton() {
 const FAQS = [
   {
     q: "What is BuzzClips?",
-    a: "BuzzClips is a next-generation video streaming and creator clip platform that delivers lightning-fast, buffer-free video playback powered by adaptive HLS technology. Viewers can watch trending viral clips, gaming highlights, tech tutorials, and entertainment videos, while creators can upload and share content effortlessly.",
+    a: "BuzzClips is a next-generation free video streaming website and creator clip platform that delivers lightning-fast, buffer-free video playback powered by adaptive HLS technology. Viewers can watch trending viral clips, gaming highlights, tech tutorials, and entertainment videos, alongside 12+ official Free-To-Air Indian Live TV channels.",
+  },
+  {
+    q: "Can I watch free Indian live TV on BuzzClips?",
+    a: "Yes! BuzzClips features BuzzClips TV (https://buzzclips.app/tv), offering 12+ official Free-To-Air Indian TV channels including DD National, DD Sports (live cricket, hockey, and athletic tournaments), DD News, Sansad TV Lok Sabha, and Sansad TV Rajya Sabha in full HD with zero lag.",
   },
   {
     q: "Is BuzzClips completely free to watch and use?",
     a: "Yes! BuzzClips is 100% free to explore, stream, and share videos. Anyone can watch high-definition videos with adaptive bitrate streaming without any subscription fee.",
+  },
+  {
+    q: "What makes BuzzClips one of the best free video streaming websites?",
+    a: "BuzzClips combines high-speed adaptive bitrate HLS streaming, multi-rendition resolution switching, interactive comments, creator uploads, viral shorts & reels, and official live Indian TV broadcasts in one fast, modern, and completely free web platform.",
   },
   {
     q: "How does BuzzClips provide buffer-free video streaming?",
@@ -85,11 +115,14 @@ const FAQS = [
   },
   {
     q: "What categories of video content are available on BuzzClips?",
-    a: "BuzzClips offers an expansive range of categories including Tech & Coding, Gaming, Education & Tutorials, Entertainment & Comedy, Music & Beats, News, Sports & Fitness, and Lifestyle vlogs.",
+    a: "BuzzClips offers an expansive range of categories including Free Indian TV, Tech & Coding, Gaming, Education & Tutorials, Entertainment & Comedy, Music & Beats, News, Sports & Fitness, and Lifestyle vlogs.",
   },
 ];
 
 const TRENDING_TAGS = [
+  "indian-tv",
+  "free-tv",
+  "dd-sports",
   "buzzclips",
   "tech",
   "coding",
@@ -202,6 +235,40 @@ export default async function HomePage() {
                   className="px-3 py-1.5 rounded-full text-xs font-semibold bg-card hover:bg-primary/10 text-muted-foreground hover:text-primary border border-border/60 transition-all duration-200"
                 >
                   #{tag}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Popular Free Indian TV & Video Streaming Directory */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                <h2 className="text-lg font-bold tracking-tight text-foreground">
+                  Free Indian TV & Video Streaming Directory
+                </h2>
+              </div>
+              <Link
+                href="/tv"
+                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+              >
+                <span>Live Channel Guide ➔</span>
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {POPULAR_SEO_TOPICS.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.url}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-card/80 hover:bg-primary/10 text-muted-foreground hover:text-primary border border-border/50 transition-all"
+                >
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-primary/15 text-primary font-bold">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>

@@ -66,9 +66,17 @@ export function generateWebSiteSchema(siteUrl: string = SITE_URL) {
     "@id": `${siteUrl}/#website`,
     url: siteUrl,
     name: "BuzzClips",
-    alternateName: ["BuzzClips", "BuzzClips App", "BuzzClips Streaming", "BuzzClips Video Platform"],
+    alternateName: [
+      "BuzzClips",
+      "BuzzClips TV",
+      "BuzzClips Live TV",
+      "BuzzClips Free Indian TV",
+      "BuzzClips Video Streaming",
+      "BuzzClips Platform",
+      "BuzzClips App",
+    ],
     description:
-      "Next-Gen Video Streaming Platform with adaptive HLS playback, community creator tools, and fast video discovery.",
+      "Free video streaming website and Indian Live TV platform featuring buffer-free adaptive HLS playback, creator community tools, viral shorts, and official FTA TV channels.",
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -89,6 +97,13 @@ export function generateOrganizationSchema(siteUrl: string = SITE_URL) {
     "@type": "Organization",
     "@id": `${siteUrl}/#organization`,
     name: "BuzzClips",
+    alternateName: [
+      "BuzzClips",
+      "BuzzClips TV",
+      "BuzzClips Streaming",
+      "BuzzClips Video Platform",
+      "BuzzClips India",
+    ],
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
@@ -96,6 +111,16 @@ export function generateOrganizationSchema(siteUrl: string = SITE_URL) {
       width: 512,
       height: 512,
     },
+    knowsAbout: [
+      "Indian Live TV Streaming",
+      "Free Indian TV Online",
+      "Free Video Streaming Website",
+      "Adaptive Bitrate HLS Playback",
+      "Viral Video Shorts & Reels",
+      "Doordarshan & Free-To-Air Television",
+      "Live Cricket & Sports Streaming",
+      "Online Video Platform & Creator Media",
+    ],
     sameAs: [
       "https://github.com/bideo-org/bideo_ui",
       "https://linkedin.com/in/rajitkuthiala",

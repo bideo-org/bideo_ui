@@ -26,6 +26,7 @@ import {
   generateSiteNavigationSchema,
   generateSoftwareApplicationSchema,
 } from "@/utility/seo";
+import { ALL_SEO_BUZZWORDS } from "@/constants/seoKeywords";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,11 +41,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BuzzClips - Next-Gen Video Streaming, Viral Clips & Entertainment Platform",
+    default: "BuzzClips - Free Indian TV & Next-Gen Video Streaming Platform",
     template: "%s | BuzzClips",
   },
   description:
-    "Explore, watch, and share trending videos on BuzzClips. Powered by adaptive HLS streaming, fast discovery, creator channels, and community entertainment.",
+    "Watch free Indian TV live, trending viral clips, gaming highlights, and creator shorts on BuzzClips. Fast buffer-free adaptive HLS video streaming with zero lag.",
   applicationName: "BuzzClips",
   appleWebApp: {
     capable: true,
@@ -55,51 +56,8 @@ export const metadata: Metadata = {
     telephone: false,
   },
   category: "video streaming & entertainment",
-  classification: "Video Streaming Platform, Creator Media, Viral Video Clips",
-  keywords: [
-    // Brand Variations
-    "buzzclips",
-    "buzzclips app",
-    "buzz clips",
-    "buzzclips tv",
-    "buzzclips live tv",
-    "buzzclips tv online",
-    "buzzclips live streaming",
-    "buzzclips video streaming",
-    "buzzclips platform",
-    "buzzclips official",
-    "buzzclips creator hub",
-    // Core Video & Streaming Keywords
-    "video streaming",
-    "watch videos",
-    "video streaming platform",
-    "viral video clips",
-    "trending video shorts",
-    "creator clips",
-    "short video clips",
-    "shorts",
-    "reels",
-    "watch videos online",
-    "free video streaming",
-    "video sharing platform",
-    // Technical Features
-    "HLS streaming",
-    "adaptive bitrate streaming",
-    "buffer-free video playback",
-    "fast video player",
-    "video transcoding",
-    // Popular Niches
-    "tech clips",
-    "coding tutorials",
-    "gaming highlights",
-    "gaming walkthroughs",
-    "entertainment clips",
-    "viral humor shorts",
-    "music videos and beats",
-    "sports highlights",
-    "lifestyle vlogs",
-    "community videos",
-  ],
+  classification: "Free Indian TV, Video Streaming Platform, Creator Media, Viral Video Clips",
+  keywords: ALL_SEO_BUZZWORDS,
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

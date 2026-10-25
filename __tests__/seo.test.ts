@@ -346,6 +346,38 @@ describe("SEO & Indexing Infrastructure", () => {
         expect(schema.mainEntity[0].acceptedAnswer["@type"]).toBe("Answer");
       });
     });
+
+    describe("constants/seoKeywords.ts", () => {
+      it("exports comprehensive SEO buzzwords including Indian TV and video streaming terms", async () => {
+        const { SEO_KEYWORD_GROUPS, ALL_SEO_BUZZWORDS, POPULAR_SEO_TOPICS } =
+          await import("@/constants/seoKeywords");
+
+        // Verify Indian TV buzzwords
+        expect(SEO_KEYWORD_GROUPS.INDIAN_TV).toContain("indian tv");
+        expect(SEO_KEYWORD_GROUPS.INDIAN_TV).toContain("free indian tv");
+        expect(SEO_KEYWORD_GROUPS.INDIAN_TV).toContain("watch indian tv online free");
+        expect(SEO_KEYWORD_GROUPS.INDIAN_TV).toContain("dd sports live streaming");
+
+        // Verify Video Streaming buzzwords
+        expect(SEO_KEYWORD_GROUPS.VIDEO_STREAMING_PLATFORM).toContain("video streaming website");
+        expect(SEO_KEYWORD_GROUPS.VIDEO_STREAMING_PLATFORM).toContain("free video streaming");
+
+        // Verify Hindi Regional buzzwords
+        expect(SEO_KEYWORD_GROUPS.HINDI_REGIONAL).toContain("फ्री इंडियन टीवी");
+        expect(SEO_KEYWORD_GROUPS.HINDI_REGIONAL).toContain("लाइव टीवी भारत");
+
+        // Verify ALL_SEO_BUZZWORDS
+        expect(ALL_SEO_BUZZWORDS.length).toBeGreaterThan(30);
+        expect(ALL_SEO_BUZZWORDS).toContain("free indian tv");
+        expect(ALL_SEO_BUZZWORDS).toContain("video streaming website");
+
+        // Verify POPULAR_SEO_TOPICS
+        expect(POPULAR_SEO_TOPICS.length).toBeGreaterThan(10);
+        expect(POPULAR_SEO_TOPICS.some((t) => t.url === "/tv")).toBe(true);
+        expect(POPULAR_SEO_TOPICS.some((t) => t.name === "Free Indian TV")).toBe(true);
+      });
+    });
   });
 });
+
 

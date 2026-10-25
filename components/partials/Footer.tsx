@@ -242,6 +242,83 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Popular SEO Searches & Live Indian TV Channels Directory */}
+        <div className="border-t border-border/40 mt-8 pt-6 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h4 className="text-xs font-semibold text-foreground tracking-wider uppercase flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span>Popular Free Indian TV & Video Streaming Searches</span>
+            </h4>
+            <Link
+              href="/tv"
+              className="text-[11px] font-medium text-primary hover:underline"
+            >
+              Watch Live TV Guide ➔
+            </Link>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground/80">
+            <Link href="/tv" className="hover:text-primary transition-colors font-medium text-foreground/90">
+              Free Indian TV
+            </Link>
+            <span>•</span>
+            <Link href="/tv?channel=dd-sports" className="hover:text-primary transition-colors">
+              DD Sports Live Cricket
+            </Link>
+            <span>•</span>
+            <Link href="/tv?channel=dd-national" className="hover:text-primary transition-colors">
+              DD National Live Stream
+            </Link>
+            <span>•</span>
+            <Link href="/tv?channel=dd-news" className="hover:text-primary transition-colors">
+              DD News 24x7
+            </Link>
+            <span>•</span>
+            <Link href="/tv?channel=sansad-tv-loksabha" className="hover:text-primary transition-colors">
+              Sansad TV Live
+            </Link>
+            <span>•</span>
+            <Link href="/tv?channel=dd-india" className="hover:text-primary transition-colors">
+              DD India HD
+            </Link>
+            <span>•</span>
+            <Link href="/" className="hover:text-primary transition-colors font-medium text-foreground/90">
+              Free Video Streaming
+            </Link>
+            <span>•</span>
+            <Link href="/trending" className="hover:text-primary transition-colors">
+              Trending Video Clips
+            </Link>
+            <span>•</span>
+            <Link href="/reels" className="hover:text-primary transition-colors">
+              Watch Reels Online Free
+            </Link>
+            <span>•</span>
+            <Link href="/category/gaming" className="hover:text-primary transition-colors">
+              Gaming Highlights
+            </Link>
+            <span>•</span>
+            <Link href="/category/tech" className="hover:text-primary transition-colors">
+              Tech & Coding Tutorials
+            </Link>
+            <span>•</span>
+            <Link href="/category/entertainment" className="hover:text-primary transition-colors">
+              Viral Humor & Shorts
+            </Link>
+            <span>•</span>
+            <Link href="/category/music" className="hover:text-primary transition-colors">
+              Music Beats Free
+            </Link>
+            <span>•</span>
+            <Link href="/tv" className="hover:text-primary transition-colors">
+              डीडी स्पोर्ट्स लाइव
+            </Link>
+            <span>•</span>
+            <Link href="/tv" className="hover:text-primary transition-colors">
+              फ्री इंडियन टीवी
+            </Link>
+          </div>
+        </div>
+
         {/* Bottom Sub-bar */}
         <div className="border-t border-border/40 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground text-center sm:text-left">
           <p>© {new Date().getFullYear()} BuzzClips | MIT License • 🇮🇳 Proudly Built in India</p>
