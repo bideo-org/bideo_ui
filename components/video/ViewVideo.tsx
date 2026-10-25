@@ -29,14 +29,12 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import {
   Eye,
-  Clock,
   Play,
   Sparkles,
   Film,
   AlertCircle,
   ArrowLeft,
   Tag,
-  BookmarkPlus,
   ChevronDown,
 } from "lucide-react";
 import clsx from "clsx";
@@ -236,8 +234,8 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
               {/* Creator & Action Bar */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/40">
                 {/* Creator Profile & Subscribe */}
-                <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-4 w-full sm:w-auto">
+                  <div className="flex items-center gap-3 min-w-0">
                     {(() => {
                       const uploader = video.video_uploader;
                       const displayName =
@@ -258,8 +256,8 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
 
                       return (
                         <>
-                          <Link href={channelHref}>
-                            <Avatar className="h-11 w-11 ring-2 ring-primary/20 hover:ring-primary/50 transition-all cursor-pointer">
+                          <Link href={channelHref} className="shrink-0">
+                            <Avatar className="h-10 w-10 sm:h-11 sm:w-11 ring-2 ring-primary/20 hover:ring-primary/50 transition-all cursor-pointer">
                               <AvatarImage
                                 src={uploader?.avatar_url || ""}
                                 alt={displayName}
@@ -270,17 +268,17 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                             </Avatar>
                           </Link>
 
-                          <div>
+                          <div className="min-w-0">
                             <Link
                               href={channelHref}
-                              className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block leading-tight"
+                              className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block leading-tight truncate max-w-[150px] sm:max-w-[220px]"
                             >
                               {displayName}
                             </Link>
                             {handle ? (
                               <Link
                                 href={channelHref}
-                                className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+                                className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors block truncate max-w-[150px] sm:max-w-[220px]"
                               >
                                 {handle}
                               </Link>
@@ -299,80 +297,83 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                     <SubscribeButton
                       channelId={video.video_uploader.userId}
                       size="sm"
+                      className="h-9 px-4 text-xs font-semibold shrink-0"
                     />
                   )}
                 </div>
 
-                {/* Right Actions: Views, Date, Engagement, Save */}
-                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none w-full sm:w-auto -mx-1 px-1 sm:mx-0 sm:px-0 sm:flex-wrap">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/60 border border-border/40 text-foreground shrink-0">
-                    <Eye className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span>{formattedViews} views</span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-muted-foreground bg-muted/40 border border-border/30 shrink-0">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>{timeAgo}</span>
-                  </div>
-
-                  <div className="shrink-0">
-                    <EngagementButtons videoId={video.videoId} />
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSaveModalOpen(true)}
-                    className="h-8 gap-1.5 rounded-full text-xs font-semibold bg-muted/40 hover:bg-muted/80 border-border/40 shrink-0"
-                    title="Save to playlist or watch later"
-                  >
-                    <BookmarkPlus className="w-3.5 h-3.5 text-primary" />
-                    <span>Save</span>
-                  </Button>
+                {/* Right Actions: Like/Dislike, Share, Save */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none shrink-0 w-full sm:w-auto justify-end">
+                  <EngagementButtons
+                    videoId={video.videoId}
+                    onSave={() => setSaveModalOpen(true)}
+                  />
                 </div>
               </div>
 
               {/* Video Details Card */}
               <Card className="border border-border/40 bg-card/75 backdrop-blur-sm rounded-xl p-4 sm:p-5">
                 <CardContent className="p-0 space-y-3.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant="secondary"
-                      className="text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                    >
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      HLS Adaptive Stream
-                    </Badge>
+                  {/* Top Metadata Row: Views, Upload Time, and Badges */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/30">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-foreground">
+                      <span className="flex items-center gap-1.5 font-bold">
+                        <Eye className="w-4 h-4 text-primary shrink-0" />
+                        {formattedViews} views
+                      </span>
+                      <span className="text-muted-foreground/40">•</span>
+                      <span suppressHydrationWarning className="text-muted-foreground font-medium">
+                        {timeAgo}
+                      </span>
+                      {formattedDate && (
+                        <>
+                          <span className="text-muted-foreground/30 hidden sm:inline">•</span>
+                          <span suppressHydrationWarning className="text-xs text-muted-foreground/80 font-normal hidden sm:inline">
+                            {formattedDate}
+                          </span>
+                        </>
+                      )}
+                    </div>
 
-                    {video.category && (
-                      <Link href={`/category/${video.category.toLowerCase()}`}>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Badge
+                        variant="secondary"
+                        className="text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Adaptive HLS
+                      </Badge>
+
+                      {video.category && (
+                        <Link href={`/category/${video.category.toLowerCase()}`}>
+                          <Badge
+                            variant="outline"
+                            className="text-[11px] font-semibold bg-background/50 uppercase tracking-wider hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                          >
+                            {video.category}
+                          </Badge>
+                        </Link>
+                      )}
+
+                      {video.visibility && video.visibility !== "PUBLIC" && (
                         <Badge
                           variant="outline"
-                          className="text-xs font-semibold bg-background/50 uppercase tracking-wider hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                          className="text-[11px] font-medium text-amber-500 border-amber-500/30"
                         >
-                          {video.category}
+                          {video.visibility}
                         </Badge>
-                      </Link>
-                    )}
+                      )}
 
-                    {video.visibility && video.visibility !== "PUBLIC" && (
-                      <Badge
-                        variant="outline"
-                        className="text-xs font-medium text-amber-500 border-amber-500/30"
-                      >
-                        {video.visibility}
+                      <Badge variant="outline" className="text-[11px] font-medium">
+                        HD Quality
                       </Badge>
-                    )}
 
-                    <Badge variant="outline" className="text-xs font-medium">
-                      HD Quality
-                    </Badge>
-
-                    {video.video_duration && (
-                      <Badge variant="outline" className="text-xs font-medium">
-                        Duration: {video.video_duration}
-                      </Badge>
-                    )}
+                      {video.video_duration && (
+                        <Badge variant="outline" className="text-[11px] font-medium text-muted-foreground">
+                          {video.video_duration}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   {/* Video Description with View More / Show Less */}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ThumbsUp, ThumbsDown, Share2, Check } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Share2, Check, BookmarkPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { EngagementDTO } from "@/types/video";
@@ -11,11 +11,13 @@ import { useAuth } from "@/store/auth-context";
 interface EngagementButtonsProps {
   videoId: number;
   initialEngagement?: EngagementDTO;
+  onSave?: () => void;
 }
 
 export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
   videoId,
   initialEngagement,
+  onSave,
 }) => {
   const { token } = useAuth();
 
@@ -138,17 +140,17 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+    <div className="flex items-center gap-2 shrink-0">
       {/* Pill: Like & Dislike */}
-      <div className="flex items-center bg-muted/60 border border-border/50 backdrop-blur-sm rounded-full p-0.5">
+      <div className="flex items-center bg-muted/60 border border-border/50 backdrop-blur-sm rounded-full p-0.5 h-9">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleLike}
           aria-label="Like video"
-          className={`gap-1 sm:gap-1.5 rounded-full px-2.5 sm:px-3.5 h-8 text-xs font-semibold transition-colors ${
+          className={`gap-1.5 rounded-full px-3 h-8 text-xs font-semibold transition-colors ${
             data.userReaction === "LIKE"
-              ? "text-primary bg-primary/10 shadow-sm"
+              ? "text-primary bg-primary/10 shadow-xs"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -158,7 +160,7 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
           <span>{data.likesCount.toLocaleString()}</span>
         </Button>
 
-        <span className="h-4 w-px bg-border/60 mx-1" />
+        <span className="h-4 w-px bg-border/60 mx-0.5" />
 
         <Button
           variant="ghost"
@@ -182,7 +184,8 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
         variant="outline"
         size="sm"
         onClick={handleShare}
-        className="rounded-full gap-1 sm:gap-1.5 h-8 px-2.5 sm:px-3.5 text-xs font-medium border-border/50 hover:bg-primary/10 hover:text-primary transition-colors"
+        className="rounded-full gap-1.5 h-9 px-3.5 text-xs font-semibold bg-muted/60 border border-border/50 hover:bg-muted text-foreground transition-colors"
+        aria-label="Share video"
       >
         {copied ? (
           <Check className="w-3.5 h-3.5 text-emerald-500" />
@@ -191,6 +194,21 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
         )}
         <span>{copied ? "Copied" : "Share"}</span>
       </Button>
+
+      {/* Save Button */}
+      {onSave && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onSave}
+          className="rounded-full gap-1.5 h-9 px-3.5 text-xs font-semibold bg-muted/60 border border-border/50 hover:bg-muted text-foreground transition-colors"
+          title="Save to playlist or watch later"
+          aria-label="Save video"
+        >
+          <BookmarkPlus className="w-3.5 h-3.5 text-primary" />
+          <span>Save</span>
+        </Button>
+      )}
     </div>
   );
 };
