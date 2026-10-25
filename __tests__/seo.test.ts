@@ -152,7 +152,8 @@ describe("SEO & Indexing Infrastructure", () => {
       expect(json.provider_name).toBe("BuzzClips");
       expect(json.width).toBe(1280);
       expect(json.height).toBe(720);
-      expect(json.html).toContain("iframe");
+      expect(json.html).toContain("<iframe");
+      expect(json.html).toContain("/embed/how-to-code");
     });
 
     it("resolves numeric id via getVideoById", async () => {
@@ -300,6 +301,7 @@ describe("SEO & Indexing Infrastructure", () => {
         expect(schema.keywords).toBe("coding, react, nextjs");
         expect(schema.author.name).toBe("LeadDev");
         expect(schema.author.url).toContain("/profile/user_42");
+        expect(schema.embedUrl).toContain("/embed/full-stack-tutorial");
         expect(schema.interactionStatistic.userInteractionCount).toBe(5000);
       });
 

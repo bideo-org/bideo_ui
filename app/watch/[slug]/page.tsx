@@ -54,22 +54,37 @@ export async function generateMetadata({
               alt: title,
             },
           ],
-          videos: video.m3u8Url
-            ? [
-                {
-                  url: video.m3u8Url,
-                  type: "application/x-mpegURL",
-                  width: 1280,
-                  height: 720,
-                },
-              ]
-            : [],
+          videos: [
+            {
+              url: `${baseUrl}/embed/${video.slug || video.videoId}`,
+              width: 1280,
+              height: 720,
+            },
+            ...(video.m3u8Url
+              ? [
+                  {
+                    url: video.m3u8Url,
+                    type: "application/x-mpegURL",
+                    width: 1280,
+                    height: 720,
+                  },
+                ]
+              : []),
+          ],
         },
         twitter: {
-          card: "summary_large_image",
+          card: "player",
           title,
           description,
           images: [thumbnailUrl],
+          players: [
+            {
+              playerUrl: `${baseUrl}/embed/${video.slug || video.videoId}`,
+              streamUrl: video.m3u8Url || `${baseUrl}/embed/${video.slug || video.videoId}`,
+              width: 1280,
+              height: 720,
+            },
+          ],
         },
       };
     }

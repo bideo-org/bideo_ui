@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const watchUrl = `${baseUrl}/watch/${video.slug || video.videoId}`;
+  const embedUrl = `${baseUrl}/embed/${video.slug || video.videoId}`;
   const authorName = video.video_uploader?.user_name || "BuzzClips Creator";
   const authorUrl = video.video_uploader?.userId
     ? `${baseUrl}/profile/${video.video_uploader.userId}`
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
     thumbnail_height: 720,
     width: 1280,
     height: 720,
-    html: `<iframe src="${watchUrl}" width="1280" height="720" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
+    html: `<iframe src="${embedUrl}" width="1280" height="720" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="${video.video_title}"></iframe>`,
   };
 
   return Response.json(oembedResponse, {

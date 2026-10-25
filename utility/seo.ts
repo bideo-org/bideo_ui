@@ -314,7 +314,7 @@ export function generateVideoJsonLd(
     thumbnailUrl: [thumbnailUrl],
     uploadDate,
     contentUrl: video.m3u8Url,
-    embedUrl: watchUrl,
+    embedUrl: `${siteUrl}/embed/${video.slug || video.videoId}`,
     inLanguage: "en",
     isFamilyFriendly: true,
     publisher: {

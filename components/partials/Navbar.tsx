@@ -28,9 +28,13 @@ import { useAuth } from "@/store/auth-context";
 
 export function Navbar() {
   const pathname = usePathname();
-  const isReels = pathname === "/reels" || pathname?.startsWith("/reels/");
   const { setTheme } = useTheme();
   const { isAuthenticated, isLoaded = true, logout, user } = useAuth();
+
+  if (pathname?.startsWith("/embed")) {
+    return null;
+  }
+  const isReels = pathname === "/reels" || pathname?.startsWith("/reels/");
 
   return (
     <header

@@ -11,6 +11,10 @@ export function MobileNav() {
   const pathname = usePathname();
   const { isAuthenticated, isLoaded = true, user } = useAuth();
 
+  if (pathname?.startsWith("/embed")) {
+    return null;
+  }
+
   const navItems = [
     {
       label: "Home",

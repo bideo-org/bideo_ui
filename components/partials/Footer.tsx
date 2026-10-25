@@ -28,7 +28,7 @@ try {
 export function Footer() {
   const pathname = usePathname();
 
-  if (pathname === "/reels" || pathname?.startsWith("/reels/")) {
+  if (pathname === "/reels" || pathname?.startsWith("/reels/") || pathname?.startsWith("/embed")) {
     return null;
   }
   const envSha = process.env.NEXT_PUBLIC_GIT_COMMIT_SHA;
