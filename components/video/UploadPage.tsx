@@ -55,6 +55,8 @@ import {
   completePresignedUpload,
   abortPresignedUpload,
 } from "@/utility/requests";
+import { ReelsStudioBanner } from "./ReelsStudioBanner";
+import { ReelsStudio } from "@/components/reels-studio/ReelsStudio";
 
 const MAX_FILE_SIZE_MB = 1000; // 1GB direct S3 upload
 
@@ -103,6 +105,7 @@ export default function UploadPage() {
   const [createdVideoId, setCreatedVideoId] = useState<number | null>(null);
   const [uploadProcessId, setUploadProcessId] = useState<string | null>(null);
   const [transcodeProgress, setTranscodeProgress] = useState<TranscodeProgress | null>(null);
+  const [isStudioOpen, setIsStudioOpen] = useState(false);
 
   // Subscribe to live Server-Sent Events (SSE) via processId or videoId with REST polling fallback
   useEffect(() => {
@@ -539,9 +542,38 @@ export default function UploadPage() {
   }
 
   return (
-    <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-primary/5 bg-card/85 backdrop-blur-md rounded-2xl overflow-hidden">
-      {/* Decorative gradient top bar */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+    <>
+      {/* Shiny Alert Banner for Logged-In Users */}
+      <ReelsStudioBanner onOpenStudio={() => setIsStudioOpen(true)} />
+
+      {/* Fullscreen Reels Studio Modal */}
+      {isStudioOpen && (
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl overflow-y-auto p-2 sm:p-6 flex flex-col items-center">
+          <div className="w-full max-w-7xl">
+            <ReelsStudio
+              initialFile={selectedFile}
+              onClose={() => setIsStudioOpen(false)}
+              onUploadFinishedReel={(file, meta) => {
+                setValue("file", file, { shouldValidate: true });
+                setValue("videoTitle", meta.title.slice(0, 100), { shouldValidate: true });
+                setValue("tags", meta.tags, { shouldValidate: true });
+                setValue("category", meta.category, { shouldValidate: true });
+                setValue(
+                  "description",
+                  "Created with BuzzClips Reels Studio ✨ #reels #buzzclips #viral",
+                  { shouldValidate: true }
+                );
+                setIsStudioOpen(false);
+                toast.success("Reel loaded into upload form! Ready to publish 🚀");
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-primary/5 bg-card/85 backdrop-blur-md rounded-2xl overflow-hidden">
+        {/* Decorative gradient top bar */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
 
       <CardHeader className="space-y-1.5 pb-4">
         <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 w-fit mb-1">
@@ -855,5 +887,6 @@ export default function UploadPage() {
         </Form>
       </CardContent>
     </Card>
+    </>
   );
 }
