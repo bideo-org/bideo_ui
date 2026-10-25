@@ -310,16 +310,25 @@ export async function fetchUserVideos(
 export async function deleteVideo(
   userId: string,
   videoId: number,
-  token: string
+  token?: string | null
 ) {
-  const res = await fetch(`${api_instance}/vid/user/${userId}/${videoId}`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!res.ok) throw new Error("Failed to fetch user videos");
+  const headers: Record<string, string> = {};
+  if (token && token !== "undefined" && token !== "null") {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(
+    `${api_instance}/vid/user/${encodeURIComponent(userId)}/${videoId}`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers,
+    }
+  );
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => "");
+    throw new Error(errorText || "Failed to delete video");
+  }
   return res.text();
 }
 

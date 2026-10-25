@@ -621,10 +621,13 @@ describe("Video Requests Utility", () => {
     });
 
     it("throws on deleteVideo failure", async () => {
-      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        text: async () => "Failed to delete video",
+      });
       const { deleteVideo } = await import("@/utility/requests");
       await expect(deleteVideo("u123", 55, "tok")).rejects.toThrow(
-        "Failed to fetch user videos"
+        "Failed to delete video"
       );
     });
   });
