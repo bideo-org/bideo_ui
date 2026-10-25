@@ -24,8 +24,6 @@ describe("VideoCard Component", () => {
     video_uploader: {
       userId: "user_123",
       user_name: "Tech Guru",
-      username: "techguru",
-      fullName: "Tech Guru",
       avatar_url: "https://example.com/avatar.jpg",
     },
   };

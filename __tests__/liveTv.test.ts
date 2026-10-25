@@ -66,8 +66,8 @@ describe("Indian Live TV Infrastructure & SEO", () => {
     );
     expect(broadcastEvent).toBeDefined();
     expect(broadcastEvent?.isLiveBroadcast).toBe(true);
-    expect(broadcastEvent?.video?.["@type"]).toBe("VideoObject");
-    expect(broadcastEvent?.video?.contentUrl).toBe(ddNational.streamUrl);
+    expect(broadcastEvent?.video["@type"]).toBe("VideoObject");
+    expect(broadcastEvent?.video.contentUrl).toBe(ddNational.streamUrl);
   });
 
   it("generates Schema.org ItemList directory for Channel Guide", () => {
