@@ -257,6 +257,10 @@ export function Footer() {
             </Link>
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground/80">
+            <Link href="/" className="hover:text-primary transition-colors font-medium text-foreground/90">
+              Buzz Clips
+            </Link>
+            <span>•</span>
             <Link href="/tv" className="hover:text-primary transition-colors font-medium text-foreground/90">
               Free Indian TV
             </Link>
@@ -285,6 +289,14 @@ export function Footer() {
               Free Video Streaming
             </Link>
             <span>•</span>
+            <Link href="/tv" className="hover:text-primary transition-colors">
+              BuzzClip TV
+            </Link>
+            <span>•</span>
+            <Link href="/category/entertainment" className="hover:text-primary transition-colors">
+              Web Series & Short Films
+            </Link>
+            <span>•</span>
             <Link href="/trending" className="hover:text-primary transition-colors">
               Trending Video Clips
             </Link>
@@ -293,16 +305,20 @@ export function Footer() {
               Watch Reels Online Free
             </Link>
             <span>•</span>
+            <Link href="/reels" className="hover:text-primary transition-colors">
+              Buzz Clip Shorts
+            </Link>
+            <span>•</span>
+            <Link href="/category/entertainment" className="hover:text-primary transition-colors">
+              Video Podcasts & Shows
+            </Link>
+            <span>•</span>
             <Link href="/category/gaming" className="hover:text-primary transition-colors">
               Gaming Highlights
             </Link>
             <span>•</span>
             <Link href="/category/tech" className="hover:text-primary transition-colors">
               Tech & Coding Tutorials
-            </Link>
-            <span>•</span>
-            <Link href="/category/entertainment" className="hover:text-primary transition-colors">
-              Viral Humor & Shorts
             </Link>
             <span>•</span>
             <Link href="/category/music" className="hover:text-primary transition-colors">
@@ -315,6 +331,10 @@ export function Footer() {
             <span>•</span>
             <Link href="/tv" className="hover:text-primary transition-colors">
               फ्री इंडियन टीवी
+            </Link>
+            <span>•</span>
+            <Link href="/" className="hover:text-primary transition-colors">
+              बज़ क्लिप्स
             </Link>
           </div>
         </div>

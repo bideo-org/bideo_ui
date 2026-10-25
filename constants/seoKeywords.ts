@@ -1,13 +1,232 @@
 /**
- * Comprehensive SEO Keywords & Buzzwords Catalog for BuzzClips & BuzzClips TV.
+ * Comprehensive SEO Keywords, Brand Permutations & Buzzwords Catalog for BuzzClips & BuzzClips TV.
  * Curated for search engine dominance across Google, Bing, Yahoo, and DuckDuckGo for:
- * 1. Indian TV & Free Live TV Streaming ("indian tv", "free indian tv", "dd sports", "live tv india")
- * 2. Video Streaming Websites & OTT ("free video streaming", "video streaming website", "buffer-free HLS")
- * 3. Short Videos, Viral Reels & Entertainment ("viral video clips", "watch reels online free", "shorts")
- * 4. Technical Platform Capabilities ("adaptive bitrate streaming", "fast video player", "creator hub")
+ * 1. Brand Permutations & Combinations ("buzzclips", "buzz clips", "buzzclip", "buzz clip", etc.)
+ * 2. Creative Works & Media Formats (web series, short films, movies, podcasts, songs, anime, vlogs)
+ * 3. Indian TV & Free Live TV Streaming ("indian tv", "free indian tv", "dd sports", "live tv india")
+ * 4. Video Streaming Websites & OTT ("free video streaming", "video streaming website", "buffer-free HLS")
+ * 5. Short Videos, Viral Reels & Entertainment ("viral video clips", "watch reels online free", "shorts")
+ * 6. Regional & Multilingual Variations (Hindi, Hinglish, regional scripts)
  */
 
 export const SEO_KEYWORD_GROUPS = {
+  // 1. Comprehensive Brand Name Permutations & Combinations (Plural/Singular, Spaced/Unspaced, Hyphenated, Domain)
+  BRAND_AND_OFFICIAL: [
+    // Standard Canonical Brand Forms
+    "buzzclips",
+    "buzz clips",
+    "buzzclip",
+    "buzz clip",
+    "buzz-clips",
+    "buzz-clip",
+    "buzzclips.app",
+    "buzzclip.app",
+    "buzzclips app",
+    "buzz clips app",
+    "buzzclip app",
+    "buzz clip app",
+    "buzzclips official",
+    "buzz clips official",
+    "buzzclip official",
+    "buzz clip official",
+    "buzzclips website",
+    "buzz clips website",
+    "buzzclip website",
+    "buzz clip website",
+    "buzzclips web",
+    "buzz clips web",
+    "buzzclip web",
+    "buzz clip web",
+    "buzzclips india",
+    "buzz clips india",
+    "buzzclip india",
+    "buzz clip india",
+
+    // Brand + TV & Live Streaming Combinations
+    "buzzclips tv",
+    "buzz clips tv",
+    "buzzclip tv",
+    "buzz clip tv",
+    "buzzclips live tv",
+    "buzz clips live tv",
+    "buzzclip live tv",
+    "buzz clip live tv",
+    "buzzclips live",
+    "buzz clips live",
+    "buzzclip live",
+    "buzz clip live",
+    "buzzclips tv streaming",
+    "buzz clips tv streaming",
+    "buzzclip tv streaming",
+    "buzz clip tv streaming",
+    "watch buzzclips tv",
+    "watch buzz clips tv",
+    "watch buzzclip tv",
+    "watch buzz clip tv",
+    "buzzclips free tv",
+    "buzz clips free tv",
+    "buzzclip free tv",
+    "buzz clip free tv",
+    "buzzclips online tv",
+    "buzz clips online tv",
+    "buzzclip online tv",
+    "buzz clip online tv",
+    "buzzclips live channels",
+    "buzz clips live channels",
+    "buzzclip live channels",
+
+    // Brand + Video Streaming Platform Combinations
+    "buzzclips video",
+    "buzz clips video",
+    "buzzclip video",
+    "buzz clip video",
+    "buzzclips streaming",
+    "buzz clips streaming",
+    "buzzclip streaming",
+    "buzz clip streaming",
+    "buzzclips video streaming",
+    "buzz clips video streaming",
+    "buzzclip video streaming",
+    "buzz clip video streaming",
+    "buzzclips video platform",
+    "buzz clips video platform",
+    "buzzclip video platform",
+    "buzz clip video platform",
+    "buzzclips video player",
+    "buzz clips video player",
+    "buzzclip video player",
+    "buzz clip video player",
+    "watch buzzclips",
+    "watch buzz clips",
+    "watch buzzclip",
+    "watch buzz clip",
+    "stream buzzclips",
+    "stream buzz clips",
+    "stream buzzclip",
+    "stream buzz clip",
+    "buzzclips online",
+    "buzz clips online",
+    "buzzclip online",
+    "buzz clip online",
+    "buzzclips free",
+    "buzz clips free",
+    "buzzclip free",
+    "buzz clip free",
+
+    // Brand + Reels, Shorts & Creator Hub Combinations
+    "buzzclips reels",
+    "buzz clips reels",
+    "buzzclip reels",
+    "buzz clip reels",
+    "buzz clip reel",
+    "buzzclips reel",
+    "buzzclips shorts",
+    "buzz clips shorts",
+    "buzzclip shorts",
+    "buzz clip shorts",
+    "buzzclips creator",
+    "buzz clips creator",
+    "buzzclip creator",
+    "buzz clip creator",
+    "buzzclips creator hub",
+    "buzz clips creator hub",
+    "buzzclip creator hub",
+    "buzzclips channel",
+    "buzz clips channel",
+    "buzzclip channel",
+    "buzz clip channel",
+    "buzzclips upload",
+    "buzz clips upload",
+    "buzzclip upload",
+    "buzzclips trending",
+    "buzz clips trending",
+    "buzzclip trending",
+    "buzz clip trending",
+
+    // Common Misspellings, Phonetic & Slang Variants
+    "buzzclipz",
+    "buzzclipsz",
+    "buzz clipz",
+    "bideo buzzclips",
+    "buzzclips ott",
+    "buzz clips ott",
+    "buzzclips tube",
+    "buzz clips tube",
+    "buzzclips player online",
+    "buzz clips mobile stream",
+  ],
+
+  // 2. Creative Works, Media Formats & Entertainment Content
+  CREATIVE_WORKS_AND_FORMATS: [
+    // Web Series & Serial Dramas
+    "web series free online",
+    "hindi web series free stream",
+    "watch web series online",
+    "indian web series streaming",
+    "original web series free",
+    "drama series online free",
+    "episodes and shows streaming",
+
+    // Short Films & Cinema
+    "short films online",
+    "award winning short films free",
+    "indian short films streaming",
+    "independent short films",
+    "indie cinema free stream",
+    "full movies free streaming",
+    "hindi movies online free",
+    "bollywood movies free online",
+    "regional movies streaming india",
+
+    // Podcasts & Talk Shows
+    "video podcasts online",
+    "watch podcasts free",
+    "creator talk shows",
+    "interview shows and discussions",
+    "tech podcasts stream",
+    "business and startup podcasts",
+
+    // Music, Songs & Audio Tracks
+    "music videos free streaming",
+    "independent music artists india",
+    "lofi beats video streaming",
+    "bollywood song video clips",
+    "punjabi music videos online",
+    "hindi romantic songs video",
+    "hip hop beats and rap videos",
+    "devotional bhajans and aarti",
+
+    // Documentaries & Educational Works
+    "documentary films free stream",
+    "travel documentaries online",
+    "science and tech documentaries",
+    "history documentaries free",
+    "coding tutorials full course",
+    "free programming videos online",
+    "tech reviews and gadgets",
+
+    // Stand-up Comedy & Sketches
+    "stand up comedy specials free",
+    "hindi stand up comedy online",
+    "comedy sketches and skits",
+    "parody videos and humor clips",
+    "funny viral reels and shorts",
+
+    // Sports Works & Match Highlights
+    "cricket match highlights free",
+    "football match highlights",
+    "sports video clips online",
+    "live sports streaming india free",
+    "esports tournaments and gameplay",
+
+    // Animations & Anime
+    "anime video streaming free",
+    "animated short films",
+    "cartoons online free stream",
+    "manga and anime clips online",
+  ],
+
+  // 3. Indian TV & Free Live TV Streaming Channels
   INDIAN_TV: [
     "indian tv",
     "free indian tv",
@@ -26,6 +245,11 @@ export const SEO_KEYWORD_GROUPS = {
     "sansad tv rajya sabha live stream",
     "dd india live",
     "dd bharati live stream",
+    "dd kisan live stream",
+    "dd retro live tv",
+    "dd urdu live streaming",
+    "dd chandana live",
+    "dd sahyadri live",
     "free tv streaming india",
     "indian news channels live",
     "cricket live stream free india",
@@ -37,21 +261,11 @@ export const SEO_KEYWORD_GROUPS = {
     "live tv app free india",
     "indian tv serials and shows free",
     "official indian live streaming",
+    "free direct to home dth streaming",
+    "live cricket match free online",
   ],
 
-  HINDI_REGIONAL: [
-    "फ्री इंडियन टीवी",
-    "लाइव टीवी भारत",
-    "डीडी नेशनल लाइव",
-    "डीडी स्पोर्ट्स लाइव क्रिकेट",
-    "डीडी न्यूज़ लाइव",
-    "संसद टीवी लाइव",
-    "फ्री वीडियो स्ट्रीमिंग",
-    "ऑनलाइन टीवी देखें",
-    "भारतीय टीवी चैनल लाइव",
-    "मुफ्त टीवी स्ट्रीमिंग",
-  ],
-
+  // 4. Video Streaming Platform & OTT Capabilities
   VIDEO_STREAMING_PLATFORM: [
     "video streaming website",
     "free video streaming",
@@ -75,8 +289,11 @@ export const SEO_KEYWORD_GROUPS = {
     "video hosting platform",
     "web video streaming service",
     "instant playback video",
+    "no lag video player",
+    "free video hosting without ads",
   ],
 
+  // 5. Viral Shorts, Reels & Creator Media
   VIRAL_SHORTS_AND_REELS: [
     "viral videos",
     "viral video clips",
@@ -94,21 +311,40 @@ export const SEO_KEYWORD_GROUPS = {
     "music videos and beats free",
     "sports highlights free",
     "lifestyle vlogs online",
+    "9:16 vertical video streaming",
+    "short format creator videos",
   ],
 
-  BRAND_AND_OFFICIAL: [
-    "buzzclips",
-    "buzzclips tv",
-    "buzzclips live tv",
-    "buzzclips app",
-    "buzzclips streaming",
-    "buzzclips video platform",
-    "buzzclips official",
-    "watch buzzclips tv",
-    "buzzclips free tv",
-    "buzzclips video player",
-    "buzzclips creator hub",
-    "buzzclips online tv",
+  // 6. Regional Indian Language Permutations (Hindi, Devanagari & Transliterated)
+  HINDI_REGIONAL: [
+    // Devanagari Brand Permutations
+    "बज़क्लिप्स",
+    "बज़ क्लिप्स",
+    "बज़क्लिप",
+    "बज़ क्लिप",
+    "बज़क्लिप्स टीवी",
+    "बज़ क्लिप्स टीवी",
+    "बज़क्लिप टीवी",
+    "बज़क्लिप्स ऐप",
+    "बज़ क्लिप्स ऐप",
+    "बज़क्लिप्स वीडियो",
+    "बज़ क्लिप्स वीडियो",
+
+    // Indian TV & Media Queries
+    "फ्री इंडियन टीवी",
+    "लाइव टीवी भारत",
+    "डीडी नेशनल लाइव",
+    "डीडी स्पोर्ट्स लाइव क्रिकेट",
+    "डीडी न्यूज़ लाइव",
+    "संसद टीवी लाइव",
+    "फ्री वीडियो स्ट्रीमिंग",
+    "ऑनलाइन टीवी देखें",
+    "भारतीय टीवी चैनल लाइव",
+    "मुफ्त टीवी स्ट्रीमिंग",
+    "फ्री वेब सीरीज",
+    "शॉर्ट वीडियो ऑनलाइन",
+    "मुफ्त फिल्में देखें",
+    "भारत लाइव टीवी चैनल",
   ],
 } as const;
 
@@ -119,6 +355,7 @@ export const SEO_KEYWORD_GROUPS = {
 export const ALL_SEO_BUZZWORDS: string[] = Array.from(
   new Set([
     ...SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL,
+    ...SEO_KEYWORD_GROUPS.CREATIVE_WORKS_AND_FORMATS,
     ...SEO_KEYWORD_GROUPS.INDIAN_TV,
     ...SEO_KEYWORD_GROUPS.VIDEO_STREAMING_PLATFORM,
     ...SEO_KEYWORD_GROUPS.VIRAL_SHORTS_AND_REELS,
@@ -126,11 +363,32 @@ export const ALL_SEO_BUZZWORDS: string[] = Array.from(
   ])
 );
 
+/**
+ * Generates an array of search permutations for a given subject/topic
+ * across all major brand spellings ("buzzclips", "buzz clips", "buzzclip", "buzz clip").
+ *
+ * Example: generateBrandPermutations("live tv") ->
+ * ["buzzclips live tv", "buzz clips live tv", "buzzclip live tv", "buzz clip live tv", ...]
+ */
+export function generateBrandPermutations(subject: string): string[] {
+  const brandVariants = ["buzzclips", "buzz clips", "buzzclip", "buzz clip"];
+  const cleanSubject = subject.trim().toLowerCase();
+  const results: string[] = [];
+
+  for (const b of brandVariants) {
+    results.push(`${b} ${cleanSubject}`);
+    results.push(`${cleanSubject} on ${b}`);
+    results.push(`watch ${cleanSubject} ${b}`);
+  }
+
+  return Array.from(new Set(results));
+}
+
 export interface SeoTopicItem {
   name: string;
   url: string;
   badge?: string;
-  category: "tv" | "streaming" | "reels" | "category";
+  category: "tv" | "streaming" | "reels" | "category" | "works";
 }
 
 /**
@@ -138,7 +396,7 @@ export interface SeoTopicItem {
  * Provides high-intent anchor text that reinforces search engine authority for target queries.
  */
 export const POPULAR_SEO_TOPICS: SeoTopicItem[] = [
-  // Indian TV & Free Channels
+  // Indian TV & Free Live Channels
   { name: "Free Indian TV", url: "/tv", badge: "Live", category: "tv" },
   { name: "DD National Live", url: "/tv?channel=dd-national", category: "tv" },
   { name: "DD Sports Live", url: "/tv?channel=dd-sports", badge: "Live Cricket", category: "tv" },
@@ -151,14 +409,16 @@ export const POPULAR_SEO_TOPICS: SeoTopicItem[] = [
   { name: "DD Retro Classics", url: "/tv?channel=dd-retro", category: "tv" },
   { name: "DD Urdu", url: "/tv?channel=dd-urdu", category: "tv" },
 
-  // Video Streaming & OTT
+  // Video Streaming, Works & OTT Formats
   { name: "Free Video Streaming", url: "/", category: "streaming" },
   { name: "Trending Videos", url: "/trending", badge: "Hot", category: "streaming" },
   { name: "Reels & Shorts", url: "/reels", badge: "New", category: "reels" },
   { name: "Viral Video Clips", url: "/category/entertainment", category: "streaming" },
-  { name: "Gaming Highlights", url: "/category/gaming", category: "streaming" },
+  { name: "Web Series & Short Films", url: "/category/entertainment", badge: "Works", category: "works" },
+  { name: "Video Podcasts & Shows", url: "/category/entertainment", category: "works" },
+  { name: "Gaming Highlights & Streams", url: "/category/gaming", category: "streaming" },
   { name: "Tech & Coding Tutorials", url: "/category/tech", category: "streaming" },
-  { name: "Music & Beats", url: "/category/music", category: "streaming" },
-  { name: "Education & Guides", url: "/category/education", category: "streaming" },
+  { name: "Music Videos & Lofi Beats", url: "/category/music", category: "streaming" },
+  { name: "Education & Documentaries", url: "/category/education", category: "streaming" },
   { name: "Lifestyle & Vlogs", url: "/category/lifestyle", category: "streaming" },
 ];

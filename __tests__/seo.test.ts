@@ -366,8 +366,28 @@ describe("SEO & Indexing Infrastructure", () => {
         expect(SEO_KEYWORD_GROUPS.HINDI_REGIONAL).toContain("फ्री इंडियन टीवी");
         expect(SEO_KEYWORD_GROUPS.HINDI_REGIONAL).toContain("लाइव टीवी भारत");
 
+        // Verify Brand Permutations & Combinations
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzz clips");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzz clip");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzzclip");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzzclips");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzz clips tv");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzzclip tv");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzz clips app");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzzclip app");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzz clips reels");
+        expect(SEO_KEYWORD_GROUPS.BRAND_AND_OFFICIAL).toContain("buzzclip reels");
+
+        // Verify Creative Works and Media Formats
+        expect(SEO_KEYWORD_GROUPS.CREATIVE_WORKS_AND_FORMATS).toContain("web series free online");
+        expect(SEO_KEYWORD_GROUPS.CREATIVE_WORKS_AND_FORMATS).toContain("short films online");
+        expect(SEO_KEYWORD_GROUPS.CREATIVE_WORKS_AND_FORMATS).toContain("video podcasts online");
+
         // Verify ALL_SEO_BUZZWORDS
-        expect(ALL_SEO_BUZZWORDS.length).toBeGreaterThan(30);
+        expect(ALL_SEO_BUZZWORDS.length).toBeGreaterThan(50);
+        expect(ALL_SEO_BUZZWORDS).toContain("buzz clips");
+        expect(ALL_SEO_BUZZWORDS).toContain("buzz clip");
+        expect(ALL_SEO_BUZZWORDS).toContain("buzzclip");
         expect(ALL_SEO_BUZZWORDS).toContain("free indian tv");
         expect(ALL_SEO_BUZZWORDS).toContain("video streaming website");
 
@@ -375,6 +395,15 @@ describe("SEO & Indexing Infrastructure", () => {
         expect(POPULAR_SEO_TOPICS.length).toBeGreaterThan(10);
         expect(POPULAR_SEO_TOPICS.some((t) => t.url === "/tv")).toBe(true);
         expect(POPULAR_SEO_TOPICS.some((t) => t.name === "Free Indian TV")).toBe(true);
+        expect(POPULAR_SEO_TOPICS.some((t) => t.name === "Web Series & Short Films")).toBe(true);
+
+        // Verify generateBrandPermutations helper
+        const { generateBrandPermutations } = await import("@/constants/seoKeywords");
+        const perms = generateBrandPermutations("live tv");
+        expect(perms).toContain("buzzclips live tv");
+        expect(perms).toContain("buzz clips live tv");
+        expect(perms).toContain("buzzclip live tv");
+        expect(perms).toContain("buzz clip live tv");
       });
     });
   });
