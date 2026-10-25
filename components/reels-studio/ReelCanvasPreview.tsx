@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   ReelAspect,
   ReelFilter,
@@ -14,7 +14,6 @@ import {
   Music,
   Trash2,
   Sparkles,
-  Play,
 } from "lucide-react";
 import { User } from "@/store/auth-context";
 
@@ -160,27 +159,18 @@ export const ReelCanvasPreview: React.FC<ReelCanvasPreviewProps> = ({
 
         {/* Video Element */}
         {videoSrc ? (
-          <>
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              playsInline
-              loop
-              onClick={(e) => {
-                e.stopPropagation();
-                onTogglePlay();
-              }}
-              style={{ filter: combinedFilterString || undefined }}
-              className="w-full h-full object-cover transition-all duration-150"
-            />
-            {!isPlaying && (
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white/90 shadow-lg">
-                  <Play className="w-6 h-6 ml-1" />
-                </div>
-              </div>
-            )}
-          </>
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            playsInline
+            loop
+            onClick={(e) => {
+              e.stopPropagation();
+              onTogglePlay();
+            }}
+            style={{ filter: combinedFilterString || undefined }}
+            className="w-full h-full object-cover transition-all duration-150"
+          />
         ) : (
           <div className="flex flex-col items-center justify-center text-zinc-500 gap-2 p-6 text-center">
             <Sparkles className="w-10 h-10 text-primary animate-pulse" />

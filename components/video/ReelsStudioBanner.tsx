@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Sparkles, ArrowRight, Music, Sliders, Smartphone, CheckCircle } from "lucide-react";
+import { Sparkles, ArrowRight, Film, Music, Sliders, Smartphone, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/store/auth-context";

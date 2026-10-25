@@ -277,15 +277,6 @@ class ReelAudioEngine {
         }
       }
 
-      // Connect soundtrack to export destination if music track is active
-      if (track && musicVolume > 0 && this.masterGain) {
-        try {
-          this.masterGain.connect(dest);
-        } catch {
-          // already connected
-        }
-      }
-
       // Return destination audio track if available
       const audioTracks = dest.stream.getAudioTracks();
       return audioTracks.length > 0 ? audioTracks[0] : null;
