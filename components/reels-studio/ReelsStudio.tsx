@@ -4,14 +4,12 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Sparkles,
   ArrowLeft,
-  Smartphone,
   Eye,
   EyeOff,
   Play,
   Pause,
   RotateCcw,
   UploadCloud,
-  Layers,
   LogIn,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,7 +56,7 @@ export const ReelsStudio: React.FC<ReelsStudioProps> = ({
   // Video State
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(initialFile || null);
+  const [, setVideoFile] = useState<File | null>(initialFile || null);
   const [aspect, setAspect] = useState<ReelAspect>("9:16");
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState<number>(30);

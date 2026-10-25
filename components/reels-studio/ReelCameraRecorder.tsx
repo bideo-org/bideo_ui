@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { Camera, RefreshCw, Mic, MicOff, Play, Square, X, Sparkles } from "lucide-react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { RefreshCw, Mic, MicOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -84,24 +84,7 @@ export const ReelCameraRecorder: React.FC<ReelCameraRecorderProps> = ({
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
   };
 
-  // Countdown & Recording Trigger
-  const handleStartCountdown = () => {
-    if (isRecording) return;
-    setCountdown(3);
-  };
-
-  useEffect(() => {
-    if (countdown === null) return;
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (countdown === 0) {
-      setCountdown(null);
-      beginRecording();
-    }
-  }, [countdown]);
-
-  const beginRecording = () => {
+  const beginRecording = useCallback(() => {
     if (!streamRef.current) return;
     chunksRef.current = [];
 
@@ -133,7 +116,31 @@ export const ReelCameraRecorder: React.FC<ReelCameraRecorderProps> = ({
     } catch (e: any) {
       toast.error("Failed to start recording: " + e.message);
     }
+  }, [onRecorded]);
+
+  // Countdown & Recording Trigger
+  const handleStartCountdown = () => {
+    if (isRecording) return;
+    setCountdown(3);
   };
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0) {
+      setCountdown(null);
+      beginRecording();
+    }
+  }, [countdown, beginRecording]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  }, [isRecording]);
 
   // Record timer tick
   useEffect(() => {
@@ -148,14 +155,7 @@ export const ReelCameraRecorder: React.FC<ReelCameraRecorderProps> = ({
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isRecording]);
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    }
-  };
+  }, [isRecording, stopRecording]);
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);

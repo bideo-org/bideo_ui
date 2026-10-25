@@ -11,7 +11,7 @@ import {
 } from "@/utility/requests";
 import axios from "axios";
 import { Card } from "@/components/ui/card";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export function ReelsStudioClient() {
   const router = useRouter();

@@ -2,7 +2,6 @@
 
 import React, { useRef } from "react";
 import {
-  Sparkles,
   Upload,
   Camera,
   Sliders,
@@ -22,7 +21,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   ReelFilter,
   TextOverlay,
-  StickerOverlay,
   SoundtrackTrack,
   TextFontFamily,
 } from "./types";
@@ -526,7 +524,7 @@ export const ReelToolsPanel: React.FC<ReelToolsPanelProps> = ({
               </div>
             ) : (
               <p className="text-xs text-muted-foreground text-center py-4">
-                Click on any text in the phone preview or click "Add Text Sticker" to customize.
+                Click on any text in the phone preview or click &quot;Add Text Sticker&quot; to customize.
               </p>
             )}
           </div>
