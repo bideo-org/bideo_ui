@@ -495,7 +495,10 @@ export default function MyVideos() {
                               <Share2 className="h-3.5 w-3.5" />
                             </Button>
 
-                            <DeleteVideoButton videoId={video.videoId} />
+                            <DeleteVideoButton
+                              videoId={video.videoId}
+                              videoTitle={video.video_title}
+                            />
                           </div>
                         </TableCell>
                       </TableRow>

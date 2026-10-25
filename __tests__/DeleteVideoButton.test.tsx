@@ -92,6 +92,62 @@ describe("DeleteVideoButton Component", () => {
     });
   });
 
+  it("requires typing the video title before enabling delete button", async () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { userId: "user-123" },
+      token: "token-abc",
+    });
+    (deleteVideo as jest.Mock).mockResolvedValue("Deleted");
+
+    render(<DeleteVideoButton videoId={42} videoTitle="Epic Gaming Highlights" />);
+
+    fireEvent.click(screen.getByRole("button", { name: /delete video/i }));
+
+    const confirmButton = screen.getByRole("button", { name: "Delete Video" });
+    // Button is disabled until matching title is typed
+    expect(confirmButton).toBeDisabled();
+
+    const input = screen.getByPlaceholderText(/Type "Epic Gaming Highlights" to confirm/i);
+    expect(input).toBeInTheDocument();
+
+    // Type wrong title
+    fireEvent.change(input, { target: { value: "Wrong Title" } });
+    expect(confirmButton).toBeDisabled();
+
+    // Type matching title
+    fireEvent.change(input, { target: { value: "Epic Gaming Highlights" } });
+    expect(confirmButton).not.toBeDisabled();
+
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(deleteVideo).toHaveBeenCalledWith("user-123", 42, "token-abc");
+    });
+    expect(toast.success).toHaveBeenCalledWith(MESSAGES.DELETED_SUCCESS);
+  });
+
+  it("submits deletion when pressing Enter in input with matching title", async () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { userId: "user-123" },
+      token: "token-abc",
+    });
+    (deleteVideo as jest.Mock).mockResolvedValue("Deleted");
+
+    render(<DeleteVideoButton videoId={42} videoTitle="My Drone Video" />);
+
+    fireEvent.click(screen.getByRole("button", { name: /delete video/i }));
+
+    const input = screen.getByPlaceholderText(/Type "My Drone Video" to confirm/i);
+
+    // Type title and hit Enter
+    fireEvent.change(input, { target: { value: "my drone video" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(deleteVideo).toHaveBeenCalledWith("user-123", 42, "token-abc");
+    });
+  });
+
   it("shows error toast if user is unauthenticated", async () => {
     (useAuth as jest.Mock).mockReturnValue({
       user: null,
