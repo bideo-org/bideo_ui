@@ -95,6 +95,15 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_GIT_COMMIT_SHA: getGitCommitSha(),
     NEXT_PUBLIC_BUILD_NUMBER: getBuildNumber(),
   },
+  compress: true,
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "date-fns",
+      "framer-motion",
+      "@tanstack/react-query",
+    ],
+  },
   /* config options here */
   reactStrictMode: false,
   images: {

@@ -430,7 +430,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
 
                   <p className="text-xs text-muted-foreground pt-2 border-t border-border/30">
                     Uploaded on{" "}
-                    <span className="font-medium text-foreground">
+                    <span suppressHydrationWarning className="font-medium text-foreground">
                       {formattedDate}
                     </span>{" "}
                     • Encoded with adaptive streaming for ultra-low latency and
@@ -542,7 +542,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                       <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5 flex-wrap">
                         <span>{itemViews} views</span>
                         <span>•</span>
-                        <span>{itemTimeAgo}</span>
+                        <span suppressHydrationWarning>{itemTimeAgo}</span>
                       </div>
                     </div>
                   </Link>

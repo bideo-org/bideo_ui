@@ -499,7 +499,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
               )}
 
               {timeAgo && (
-                <span className="text-[11px] text-muted-foreground">
+                <span suppressHydrationWarning className="text-[11px] text-muted-foreground">
                   {timeAgo}
                 </span>
               )}

@@ -259,7 +259,7 @@ export default function WatchHistoryPage() {
                           </span>
                         )}
                         <span>•</span>
-                        <span>Watched {timeAgo}</span>
+                        <span suppressHydrationWarning>Watched {timeAgo}</span>
                       </div>
 
                       <div className="flex items-center gap-2 pt-1">

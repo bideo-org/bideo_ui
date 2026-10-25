@@ -9,7 +9,7 @@ import clsx from "clsx";
 
 export function MobileNav() {
   const pathname = usePathname();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isLoaded = true, user } = useAuth();
 
   const navItems = [
     {
@@ -86,30 +86,43 @@ export function MobileNav() {
             );
           }
 
-          if (item.isProfile && isAuthenticated && user) {
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={clsx(
-                  "flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-colors min-w-[56px]",
-                  item.isActive
-                    ? "text-primary font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-                aria-label={item.label}
-              >
-                <Avatar className="w-5 h-5 ring-1 ring-border">
-                  <AvatarImage src={user.avatar_url || ""} alt={item.label} />
-                  <AvatarFallback className="text-[10px] bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold">
-                    {(user.fullName || user.user_name || "U")[0]?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-[10px] truncate max-w-[54px] mt-0.5">
-                  {item.label}
-                </span>
-              </Link>
-            );
+          if (item.isProfile) {
+            if (!isLoaded) {
+              return (
+                <div
+                  key={item.href}
+                  className="flex flex-col items-center justify-center py-1 px-2 rounded-lg min-w-[56px]"
+                >
+                  <div className="w-5 h-5 rounded-full bg-muted/40 animate-pulse" />
+                  <span className="text-[10px] mt-0.5 text-muted-foreground/50">You</span>
+                </div>
+              );
+            }
+            if (isAuthenticated && user) {
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={clsx(
+                    "flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-colors min-w-[56px]",
+                    item.isActive
+                      ? "text-primary font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-label={item.label}
+                >
+                  <Avatar className="w-5 h-5 ring-1 ring-border">
+                    <AvatarImage src={user.avatar_url || ""} alt={item.label} />
+                    <AvatarFallback className="text-[10px] bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold">
+                      {(user.fullName || user.user_name || "U")[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-[10px] truncate max-w-[54px] mt-0.5">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            }
           }
 
           return (

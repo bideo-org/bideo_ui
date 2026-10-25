@@ -178,7 +178,7 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
               {formattedViews} views
             </span>
             <span className="text-muted-foreground/40">•</span>
-            <span>{timeAgo}</span>
+            <span suppressHydrationWarning>{timeAgo}</span>
           </div>
         </div>
       </div>

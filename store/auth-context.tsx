@@ -18,6 +18,7 @@ export interface User {
 interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
+  isLoaded: boolean;
   login: (token: string, uid: string) => Promise<void>;
   logout: () => Promise<void>;
   user?: User;
@@ -32,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [user, setUser] = useState<User | undefined>(undefined);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -46,6 +48,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (err) {
         console.error("Session load failed:", err);
+      } finally {
+        setIsLoaded(true);
       }
     };
     loadSession();
@@ -104,6 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         token,
         isAuthenticated: !!token,
+        isLoaded,
         login,
         logout,
         user,

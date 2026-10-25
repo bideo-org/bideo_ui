@@ -446,10 +446,10 @@ export default function MyVideos() {
 
                         {/* Upload Date */}
                         <TableCell className="py-3 px-4">
-                          <p className="text-xs font-medium text-foreground">
+                          <p suppressHydrationWarning className="text-xs font-medium text-foreground">
                             {timeAgo}
                           </p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p suppressHydrationWarning className="text-[11px] text-muted-foreground">
                             {formattedDate}
                           </p>
                         </TableCell>

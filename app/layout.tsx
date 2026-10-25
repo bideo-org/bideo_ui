@@ -159,6 +159,7 @@ export default function RootLayout({
         />
       </head>
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col relative w-full max-w-full overflow-x-hidden`}
       >
         <ThemeProvider>

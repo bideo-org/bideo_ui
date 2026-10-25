@@ -30,7 +30,7 @@ export function Navbar() {
   const pathname = usePathname();
   const isReels = pathname === "/reels" || pathname?.startsWith("/reels/");
   const { setTheme } = useTheme();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, isLoaded = true, logout, user } = useAuth();
 
   return (
     <header
@@ -108,8 +108,10 @@ export function Navbar() {
         {/* === Right: Auth, Theme === */}
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Auth Section (Desktop only - Mobile uses MobileNav avatar profile tab) */}
-          <div className="hidden md:flex items-center">
-            {!isAuthenticated ? (
+          <div className="hidden md:flex items-center min-w-[76px] justify-end">
+            {!isLoaded ? (
+              <div className="w-18 h-9 rounded-md bg-muted/30 animate-pulse" />
+            ) : !isAuthenticated ? (
               <Link href="/auth/login">
                 <Button variant="outline">Sign In</Button>
               </Link>
