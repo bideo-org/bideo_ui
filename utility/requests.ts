@@ -858,7 +858,7 @@ export const requestPresignedUpload = async (
 export const completePresignedUpload = async (
   payload: CompletePresignedUploadDTO,
   token: string
-): Promise<{ videoId: number; message: string }> => {
+): Promise<{ videoId: number; message: string; processId?: string }> => {
   const res = await fetch(`${api_instance}/vid/upload/complete-presigned`, {
     method: "POST",
     headers: {
@@ -873,4 +873,25 @@ export const completePresignedUpload = async (
   }
   return res.json();
 };
+
+export const abortPresignedUpload = async (
+  processId: string,
+  token?: string
+): Promise<void> => {
+  if (!processId) return;
+  try {
+    await fetch(
+      `${api_instance}/vid/upload/process/${encodeURIComponent(processId)}/abort`,
+      {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      }
+    );
+  } catch (err) {
+    console.warn("Failed to abort presigned upload process:", err);
+  }
+};
+
 

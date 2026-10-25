@@ -890,26 +890,44 @@ describe("Video Requests Utility", () => {
   });
 
   describe("Presigned Upload Requests", () => {
-    it("requests and completes presigned upload", async () => {
+    it("requests and completes presigned upload with processId", async () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ uploadUrl: "https://s3.amazonaws.com/test", s3Key: "uploads/test.mp4" }),
+        json: async () => ({
+          uploadUrl: "https://s3.amazonaws.com/test",
+          s3Key: "uploads/test.mp4",
+          processId: "proc-123",
+        }),
       });
-      const { requestPresignedUpload, completePresignedUpload } = await import("@/utility/requests");
+      const {
+        requestPresignedUpload,
+        completePresignedUpload,
+        abortPresignedUpload,
+      } = await import("@/utility/requests");
 
       const presigned = await requestPresignedUpload("test.mp4", "video/mp4", "token123");
       expect(presigned.uploadUrl).toContain("s3.amazonaws.com");
+      expect(presigned.processId).toBe("proc-123");
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ videoId: 777, message: "Queued" }),
+        json: async () => ({ videoId: 777, processId: "proc-123", message: "Queued" }),
       });
 
       const complete = await completePresignedUpload(
-        { s3Key: "uploads/test.mp4", videoTitle: "Test Title" },
+        { s3Key: "uploads/test.mp4", processId: "proc-123", videoTitle: "Test Title" },
         "token123"
       );
       expect(complete.videoId).toBe(777);
+      expect(complete.processId).toBe("proc-123");
+
+      // Test abortPresignedUpload
+      global.fetch = jest.fn().mockResolvedValue({ ok: true, text: async () => "Aborted" });
+      await expect(abortPresignedUpload("proc-123", "token123")).resolves.toBeUndefined();
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/vid/upload/process/proc-123/abort"),
+        expect.objectContaining({ method: "POST" })
+      );
     });
   });
 });

@@ -141,12 +141,14 @@ export interface PresignedUploadRequestDTO {
 export interface PresignedUploadResponseDTO {
   uploadUrl: string;
   s3Key: string;
+  processId?: string;
   publicS3Url?: string;
   expiresInSeconds?: number;
 }
 
 export interface CompletePresignedUploadDTO {
   s3Key: string;
+  processId?: string;
   videoTitle: string;
   description?: string;
   tags?: string[];
@@ -155,9 +157,11 @@ export interface CompletePresignedUploadDTO {
 }
 
 export interface TranscodeProgress {
-  videoId: number;
+  videoId?: number;
+  processId?: string;
   stage: string;
   percent: number;
   status: string;
 }
+
 

@@ -53,6 +53,7 @@ import {
 import {
   requestPresignedUpload,
   completePresignedUpload,
+  abortPresignedUpload,
 } from "@/utility/requests";
 
 const MAX_FILE_SIZE_MB = 1000; // 1GB direct S3 upload
@@ -100,11 +101,12 @@ export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [createdVideoId, setCreatedVideoId] = useState<number | null>(null);
+  const [uploadProcessId, setUploadProcessId] = useState<string | null>(null);
   const [transcodeProgress, setTranscodeProgress] = useState<TranscodeProgress | null>(null);
 
-  // Subscribe to live Server-Sent Events (SSE) with REST polling fallback
+  // Subscribe to live Server-Sent Events (SSE) via processId or videoId with REST polling fallback
   useEffect(() => {
-    if (!createdVideoId) return;
+    if (!createdVideoId && !uploadProcessId) return;
 
     let eventSource: EventSource | null = null;
     let pollInterval: NodeJS.Timeout | null = null;
@@ -121,6 +123,7 @@ export default function UploadPage() {
     };
 
     const pollStatus = async () => {
+      if (!createdVideoId) return;
       try {
         const res = await fetch(`${api_instance}/vid/${createdVideoId}/status`);
         if (res.ok) {
@@ -128,6 +131,7 @@ export default function UploadPage() {
           const videoStatus = data.videoStatus || data.status;
           setTranscodeProgress({
             videoId: createdVideoId,
+            processId: uploadProcessId || undefined,
             stage: data.stage || (videoStatus === "COMPLETED" ? "COMPLETED" : "PROCESSING"),
             percent: data.percent ?? (videoStatus === "COMPLETED" ? 100 : 50),
             status: videoStatus || "PROCESSING",
@@ -146,19 +150,30 @@ export default function UploadPage() {
     };
 
     try {
-      eventSource = new EventSource(
-        `${api_instance}/vid/${createdVideoId}/transcode-progress`
-      );
+      // Connect to SSE via processId if available, otherwise videoId transcode-progress
+      const sseUrl = uploadProcessId
+        ? `${api_instance}/vid/upload/process/${encodeURIComponent(uploadProcessId)}/progress`
+        : `${api_instance}/vid/${createdVideoId}/transcode-progress`;
+
+      eventSource = new EventSource(sseUrl);
 
       eventSource.addEventListener("progress", (event) => {
         try {
-          const data: TranscodeProgress = JSON.parse(event.data);
-          setTranscodeProgress(data);
-          if (data.status === "COMPLETED") {
-            toast.success("Multi-rendition HLS transcoding completed! Video is live 🎬");
-            stopTracking();
-          } else if (data.status === "FAILED") {
-            toast.error("Transcoding failed. Please check video format.");
+          const data: any = JSON.parse(event.data);
+          const percent = typeof data.percent === "number" ? data.percent : Number(data.percent || 0);
+          setTranscodeProgress({
+            videoId: createdVideoId || data.videoId,
+            processId: uploadProcessId || data.processId,
+            stage: data.stage || (data.status === "COMPLETED" ? "COMPLETED" : "PROCESSING"),
+            percent: percent,
+            status: data.status || (percent >= 100 ? "COMPLETED" : "PROCESSING"),
+          });
+          if (data.status === "COMPLETED" || data.status === "FAILED") {
+            if (data.status === "COMPLETED") {
+              toast.success("Multi-rendition HLS transcoding completed! Video is live 🎬");
+            } else {
+              toast.error("Transcoding failed. Please check video format.");
+            }
             stopTracking();
           }
         } catch (e) {
@@ -167,26 +182,28 @@ export default function UploadPage() {
       });
 
       eventSource.onerror = () => {
-        // SSE connection dropped; initiate REST polling fallback
+        // SSE connection dropped; initiate REST polling fallback if videoId is available
         if (eventSource) {
           eventSource.close();
           eventSource = null;
         }
-        if (!pollInterval) {
+        if (createdVideoId && !pollInterval) {
           pollStatus();
           pollInterval = setInterval(pollStatus, 3000);
         }
       };
     } catch (e) {
       console.error("Failed to connect to SSE, using polling fallback", e);
-      pollStatus();
-      pollInterval = setInterval(pollStatus, 3000);
+      if (createdVideoId) {
+        pollStatus();
+        pollInterval = setInterval(pollStatus, 3000);
+      }
     }
 
     return () => {
       stopTracking();
     };
-  }, [createdVideoId]);
+  }, [createdVideoId, uploadProcessId]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -278,44 +295,56 @@ export default function UploadPage() {
   ) => {
     const file: File = data.file;
 
-    // 1. Request presigned upload URL
+    // 1. Request presigned URL & process ID
     const presigned = await requestPresignedUpload(
       file.name,
       file.type || "video/mp4",
       token
     );
+    const { uploadUrl, s3Key, processId } = presigned;
 
-    // 2. Direct PUT to S3
-    await axios.put(presigned.uploadUrl, file, {
-      headers: {
-        "Content-Type": file.type || "video/mp4",
-      },
-      onUploadProgress: (event) => {
-        if (event.total) {
-          const percent = Math.round((event.loaded * 100) / event.total);
+    try {
+      // 2. Direct upload to S3 with progress tracking
+      await axios.put(uploadUrl, file, {
+        headers: {
+          "Content-Type": file.type || "video/mp4",
+        },
+        onUploadProgress: (progressEvent) => {
+          const total = progressEvent.total || file.size || 1;
+          const percent = Math.round((progressEvent.loaded * 100) / total);
           onProgress(percent);
-        }
-      },
-    });
+        },
+      });
 
-    // 3. Complete upload & queue for transcoding
-    const tagsList = data.tags
-      ? data.tags.split(",").map((t) => t.trim()).filter(Boolean)
-      : [];
+      // 3. Complete upload ONLY if PUT to S3 succeeded
+      const tagsList = data.tags
+        ? data.tags.split(",").map((t) => t.trim()).filter(Boolean)
+        : [];
 
-    const completeResult = await completePresignedUpload(
-      {
-        s3Key: presigned.s3Key,
-        videoTitle: data.videoTitle,
-        description: data.description,
-        tags: tagsList,
-        category: data.category as VideoCategory,
-        visibility: data.visibility as VideoVisibility,
-      },
-      token
-    );
+      const completeResult = await completePresignedUpload(
+        {
+          s3Key,
+          processId,
+          videoTitle: data.videoTitle,
+          description: data.description,
+          tags: tagsList,
+          category: data.category as VideoCategory,
+          visibility: data.visibility as VideoVisibility,
+        },
+        token
+      );
 
-    return completeResult;
+      return {
+        ...completeResult,
+        processId: processId || completeResult.processId,
+      };
+    } catch (err: any) {
+      // If S3 direct upload failed (e.g. CORS), abort process and notify backend
+      if (processId) {
+        await abortPresignedUpload(processId, token).catch(() => {});
+      }
+      throw err;
+    }
   };
 
   // Legacy Multipart fallback
@@ -358,6 +387,9 @@ export default function UploadPage() {
 
     try {
       const result = await uploadVideoDirect(values, token, setUploadProgress);
+      if (result?.processId) {
+        setUploadProcessId(result.processId);
+      }
       if (result?.videoId) {
         setCreatedVideoId(result.videoId);
       }
@@ -375,10 +407,18 @@ export default function UploadPage() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn("Direct presigned upload failed, falling back to multipart", error);
+      const isS3CorsOrNetwork =
+        error?.message?.includes("Network Error") || error?.code === "ERR_NETWORK";
+      if (isS3CorsOrNetwork) {
+        toast.error("Direct S3 upload failed (CORS or network). Falling back to server upload...");
+      }
       try {
-        await uploadVideoLegacy(values, token, setUploadProgress);
+        const legacyResult = await uploadVideoLegacy(values, token, setUploadProgress);
+        if (legacyResult?.data?.id || legacyResult?.data?.videoId) {
+          setCreatedVideoId(legacyResult.data.id || legacyResult.data.videoId);
+        }
         toast.success(MESSAGES.FILE_UPLOADED);
         setIsUploaded(true);
       } catch (fallbackErr) {
@@ -469,6 +509,7 @@ export default function UploadPage() {
             onClick={() => {
               setIsUploaded(false);
               setCreatedVideoId(null);
+              setUploadProcessId(null);
               setTranscodeProgress(null);
             }}
             className="h-10"
