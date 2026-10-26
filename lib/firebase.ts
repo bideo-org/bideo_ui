@@ -1,6 +1,10 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, Auth, signInWithPopup } from "firebase/auth";
 import { api_instance } from "@/global";
+import {
+  DEFAULT_FIREBASE_PROJECT_ID,
+  DEFAULT_FIREBASE_AUTH_DOMAIN,
+} from "@/constants/firebase";
 
 interface FirebaseClientConfig {
   apiKey: string;
@@ -17,23 +21,12 @@ let clientProvider: GoogleAuthProvider | null = null;
 export async function fetchFirebaseConfig(): Promise<FirebaseClientConfig> {
   if (cachedConfig) return cachedConfig;
 
-  // 1. Check if configured in deploy infra / client env
-  const envKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-  const envProject = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-  const envDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
-  const envAppId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID;
+  let apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  let projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  let authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
+  let appId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID;
 
-  if (envKey && !envKey.startsWith("AIzaSyD_placeholder")) {
-    cachedConfig = {
-      apiKey: envKey.trim(),
-      projectId: envProject ? envProject.trim() : "",
-      authDomain: envDomain ? envDomain.trim() : (envProject ? `${envProject.trim()}.firebaseapp.com` : ""),
-      appId: envAppId ? envAppId.trim() : undefined,
-    };
-    return cachedConfig;
-  }
-
-  // 2. Fetch live config from backend /api/app/auth/config
+  // 1. Fetch live config from backend /api/app/auth/config
   try {
     const res = await fetch(`${api_instance}/app/auth/config`, {
       cache: "no-store",
@@ -41,23 +34,55 @@ export async function fetchFirebaseConfig(): Promise<FirebaseClientConfig> {
     if (res.ok) {
       const data = await res.json();
       if (data.apiKey && data.apiKey.trim().length > 0) {
-        cachedConfig = {
-          apiKey: data.apiKey.trim(),
-          projectId: (data.projectId || "").trim(),
-          authDomain: (data.authDomain || (data.projectId ? `${data.projectId.trim()}.firebaseapp.com` : "")).trim(),
-          appId: data.appId ? data.appId.trim() : undefined,
-        };
-        return cachedConfig;
+        apiKey = data.apiKey.trim();
+      }
+      if (data.projectId && data.projectId.trim().length > 0) {
+        projectId = data.projectId.trim();
+      }
+      if (data.authDomain && data.authDomain.trim().length > 0) {
+        authDomain = data.authDomain.trim();
+      }
+      if (data.appId && data.appId.trim().length > 0) {
+        appId = data.appId.trim();
       }
     }
   } catch (err) {
-    console.error("Failed to fetch Firebase config from backend:", err);
+    console.warn("Could not retrieve Firebase config from backend:", err);
   }
 
-  throw new Error("Firebase Web API Key is not configured on deploy infra or backend");
+  // Ensure projectId and authDomain are NEVER empty (prevents auth/auth-domain-config-required)
+  const resolvedProjectId =
+    projectId && projectId.trim().length > 0
+      ? projectId.trim()
+      : DEFAULT_FIREBASE_PROJECT_ID;
+
+  const resolvedAuthDomain =
+    authDomain && authDomain.trim().length > 0
+      ? authDomain.trim()
+      : (resolvedProjectId
+          ? `${resolvedProjectId}.firebaseapp.com`
+          : DEFAULT_FIREBASE_AUTH_DOMAIN);
+
+  if (!apiKey || apiKey.startsWith("AIzaSyD_placeholder")) {
+    throw new Error(
+      "Firebase Web API Key is not configured on deploy infra or backend"
+    );
+  }
+
+  cachedConfig = {
+    apiKey: apiKey.trim(),
+    projectId: resolvedProjectId,
+    authDomain: resolvedAuthDomain,
+    appId: appId ? appId.trim() : undefined,
+  };
+
+  return cachedConfig;
 }
 
-export async function getFirebaseAuth(): Promise<{ auth: Auth; googleProvider: GoogleAuthProvider }> {
+export async function getFirebaseAuth(): Promise<{
+  auth: Auth;
+  googleProvider: GoogleAuthProvider;
+}> {
   if (clientAuth && clientProvider) {
     return { auth: clientAuth, googleProvider: clientProvider };
   }
@@ -76,7 +101,9 @@ export async function getFirebaseAuth(): Promise<{ auth: Auth; googleProvider: G
 export const getLiveFirebaseAuth = getFirebaseAuth;
 
 // Fallback exports for components or tests that directly import auth/googleProvider
-export const auth: Auth = (getApps().length > 0 ? getAuth(getApp()) : undefined) as any;
+export const auth: Auth = (
+  getApps().length > 0 ? getAuth(getApp()) : undefined
+) as any;
 export const googleProvider = new GoogleAuthProvider();
 
 export { signInWithPopup };
