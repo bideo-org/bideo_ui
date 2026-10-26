@@ -1,33 +1,82 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, Auth, signInWithPopup } from "firebase/auth";
+import { api_instance } from "@/global";
 
-const apiKey =
-  process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-  "AIzaSyD_placeholder_key_for_prerender";
+interface FirebaseClientConfig {
+  apiKey: string;
+  projectId: string;
+  authDomain: string;
+  appId?: string;
+}
 
-const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "buzzclips-prod";
+let cachedConfig: FirebaseClientConfig | null = null;
+let clientApp: FirebaseApp | null = null;
+let clientAuth: Auth | null = null;
+let clientProvider: GoogleAuthProvider | null = null;
 
-const firebaseConfig = {
-  apiKey,
-  authDomain:
-    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-    `${projectId}.firebaseapp.com`,
-  projectId,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || undefined,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || undefined,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:buzzclipsapp",
-};
+export async function fetchFirebaseConfig(): Promise<FirebaseClientConfig> {
+  if (cachedConfig) return cachedConfig;
 
-// Initialize Firebase app if not already initialized
-export const app: FirebaseApp =
-  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  // 1. Check if configured in deploy infra / client env
+  const envKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  const envProject = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const envDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
+  const envAppId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID;
 
-// Initialize Firebase Auth
-export const auth: Auth = getAuth(app);
+  if (envKey && !envKey.startsWith("AIzaSyD_placeholder")) {
+    cachedConfig = {
+      apiKey: envKey.trim(),
+      projectId: envProject ? envProject.trim() : "",
+      authDomain: envDomain ? envDomain.trim() : (envProject ? `${envProject.trim()}.firebaseapp.com` : ""),
+      appId: envAppId ? envAppId.trim() : undefined,
+    };
+    return cachedConfig;
+  }
 
+  // 2. Fetch live config from backend /api/app/auth/config
+  try {
+    const res = await fetch(`${api_instance}/app/auth/config`, {
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.apiKey && data.apiKey.trim().length > 0) {
+        cachedConfig = {
+          apiKey: data.apiKey.trim(),
+          projectId: (data.projectId || "").trim(),
+          authDomain: (data.authDomain || (data.projectId ? `${data.projectId.trim()}.firebaseapp.com` : "")).trim(),
+          appId: data.appId ? data.appId.trim() : undefined,
+        };
+        return cachedConfig;
+      }
+    }
+  } catch (err) {
+    console.error("Failed to fetch Firebase config from backend:", err);
+  }
+
+  throw new Error("Firebase Web API Key is not configured on deploy infra or backend");
+}
+
+export async function getFirebaseAuth(): Promise<{ auth: Auth; googleProvider: GoogleAuthProvider }> {
+  if (clientAuth && clientProvider) {
+    return { auth: clientAuth, googleProvider: clientProvider };
+  }
+
+  const config = await fetchFirebaseConfig();
+
+  const existingApps = getApps();
+  clientApp = existingApps.length > 0 ? getApp() : initializeApp(config);
+  clientAuth = getAuth(clientApp);
+
+  clientProvider = new GoogleAuthProvider();
+  clientProvider.setCustomParameters({ prompt: "select_account" });
+  return { auth: clientAuth, googleProvider: clientProvider };
+}
+
+export const getLiveFirebaseAuth = getFirebaseAuth;
+
+// Fallback exports for components or tests that directly import auth/googleProvider
+export const auth: Auth = (getApps().length > 0 ? getAuth(getApp()) : undefined) as any;
 export const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
-  prompt: "select_account",
-});
 
-export { signInWithPopup } from "firebase/auth";
+export { signInWithPopup };

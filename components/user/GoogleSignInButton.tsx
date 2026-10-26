@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { auth, googleProvider, signInWithPopup } from "@/lib/firebase";
+import { getFirebaseAuth, signInWithPopup } from "@/lib/firebase";
 import { googleLogin } from "@/utility/requests";
 import { useAuth } from "@/store/auth-context";
 import { toast } from "sonner";
@@ -50,7 +50,9 @@ export function GoogleSignInButton({
   const handleClick = async () => {
     setLoading(true);
     try {
-      const credential = await signInWithPopup(auth, googleProvider);
+      const { auth: activeAuth, googleProvider: activeProvider } = await getFirebaseAuth();
+
+      const credential = await signInWithPopup(activeAuth, activeProvider);
       const idToken = await credential.user.getIdToken();
       const fullName = credential.user.displayName || undefined;
 

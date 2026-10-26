@@ -1,7 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { GoogleSignInButton } from "@/components/user/GoogleSignInButton";
-import { auth, googleProvider, signInWithPopup } from "@/lib/firebase";
 import { googleLogin } from "@/utility/requests";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -18,10 +17,19 @@ jest.mock("@/store/auth-context", () => ({
 }));
 
 // Mock @/lib/firebase
+const mockSignInWithPopup = jest.fn();
 jest.mock("@/lib/firebase", () => ({
+  getFirebaseAuth: jest.fn().mockResolvedValue({
+    auth: {},
+    googleProvider: {},
+  }),
+  getLiveFirebaseAuth: jest.fn().mockResolvedValue({
+    auth: {},
+    googleProvider: {},
+  }),
   auth: {},
   googleProvider: {},
-  signInWithPopup: jest.fn(),
+  signInWithPopup: (...args: any[]) => mockSignInWithPopup(...args),
 }));
 
 // Mock @/utility/requests
@@ -70,7 +78,7 @@ describe("GoogleSignInButton", () => {
       getIdToken: jest.fn().mockResolvedValue("test-google-id-token"),
       displayName: "Jane Doe",
     };
-    (signInWithPopup as jest.Mock).mockResolvedValue({ user: mockUser });
+    mockSignInWithPopup.mockResolvedValue({ user: mockUser });
     (googleLogin as jest.Mock).mockResolvedValue({
       idToken: "backend-session-token",
       uid: "user-123",
@@ -82,7 +90,7 @@ describe("GoogleSignInButton", () => {
     fireEvent.click(btn);
 
     await waitFor(() => {
-      expect(signInWithPopup).toHaveBeenCalled();
+      expect(mockSignInWithPopup).toHaveBeenCalled();
     });
 
     await waitFor(() => {
@@ -102,13 +110,13 @@ describe("GoogleSignInButton", () => {
   it("handles user closing popup gracefully without error toast", async () => {
     const error = new Error("Popup closed") as any;
     error.code = "auth/popup-closed-by-user";
-    (signInWithPopup as jest.Mock).mockRejectedValue(error);
+    mockSignInWithPopup.mockRejectedValue(error);
 
     render(<GoogleSignInButton mode="login" />);
     fireEvent.click(screen.getByRole("button"));
 
     await waitFor(() => {
-      expect(signInWithPopup).toHaveBeenCalled();
+      expect(mockSignInWithPopup).toHaveBeenCalled();
     });
 
     // Should NOT call toast.error
@@ -121,7 +129,7 @@ describe("GoogleSignInButton", () => {
     const mockUser = {
       getIdToken: jest.fn().mockResolvedValue("test-google-id-token"),
     };
-    (signInWithPopup as jest.Mock).mockResolvedValue({ user: mockUser });
+    mockSignInWithPopup.mockResolvedValue({ user: mockUser });
     (googleLogin as jest.Mock).mockRejectedValue(new Error("Server error"));
 
     render(<GoogleSignInButton mode="login" />);
