@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { LiveTvClient } from "@/components/tv/LiveTvClient";
-import { INDIAN_LIVE_CHANNELS } from "@/constants/liveChannels";
+import { ALL_LIVE_CHANNELS } from "@/constants/liveChannels";
 import { SEO_KEYWORD_GROUPS } from "@/constants/seoKeywords";
 import {
   SITE_URL,
@@ -12,7 +12,7 @@ import {
   generateLiveTvFaqSchema,
 } from "@/utility/seo";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Radio, Tv, ShieldCheck, Zap, Sparkles } from "lucide-react";
+import { Radio, Tv, Zap, Sparkles, Globe } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -25,17 +25,17 @@ export async function generateMetadata({
 }: LiveTvPageProps): Promise<Metadata> {
   const { channel: channelId } = await searchParams;
   const channel =
-    INDIAN_LIVE_CHANNELS.find((c) => c.id === channelId) ||
-    INDIAN_LIVE_CHANNELS[0];
+    ALL_LIVE_CHANNELS.find((c) => c.id === channelId) ||
+    ALL_LIVE_CHANNELS[0];
 
   const isSpecificChannel = Boolean(channelId);
   const title = isSpecificChannel
-    ? `${channel.name} (${channel.hindiName}) Live Stream - BuzzClips TV | Free Indian TV Online`
-    : `Free Indian TV - Watch Live Indian TV Online Free HD | BuzzClips TV`;
+    ? `${channel.name} (${channel.country}) Live Stream - BuzzClips TV | Free FTA TV Online`
+    : `Free Live TV Worldwide - Watch Indian & Global FTA Channels Online HD | BuzzClips TV`;
 
   const description = isSpecificChannel
-    ? `Watch ${channel.name} (${channel.hindiName}) live stream online free in HD on BuzzClips TV. Official Indian Free-To-Air TV broadcasting Doordarshan national, sports, news, and culture with zero buffering.`
-    : `Watch free Indian TV live online in HD on BuzzClips TV. Stream official Doordarshan channels including DD Sports live cricket, DD National, DD News, Sansad TV Lok Sabha & Rajya Sabha with zero login and zero lag.`;
+    ? `Watch ${channel.name} (${channel.hindiName || channel.name}) live stream free in HD on BuzzClips TV. Official Free-To-Air broadcast from ${channel.country} featuring ${channel.category.toLowerCase()} with zero buffering and zero login.`
+    : `Watch free live TV online in HD on BuzzClips TV. Stream official Free-To-Air (FTA) channels worldwide including Doordarshan (India), Bloomberg, France 24, DW English, Al Jazeera, NHK World Japan, Red Bull TV, and news networks with zero lag.`;
 
   const canonicalUrl = `${SITE_URL}/tv${isSpecificChannel ? `?channel=${channel.id}` : ""}`;
 
@@ -44,45 +44,34 @@ export async function generateMetadata({
     description,
     keywords: [
       // Top Intent High-Volume Keywords
+      "free live tv",
+      "free fta channels",
+      "watch live tv online free",
+      "fta channels worldwide",
       "free indian tv",
-      "indian tv",
       "indian live tv",
-      "watch indian tv online free",
-      "indian tv channels live stream",
-      "live indian tv",
-      "free live tv india",
-      "hindi live tv",
+      "us live tv free",
+      "world live news streams",
+      "live sports streaming free",
       "dd sports live streaming",
       "dd national live stream",
-      "dd news live streaming",
-      "dd free dish online",
-      "free tv streaming india",
-      "sansad tv lok sabha live",
-      "sansad tv rajya sabha live stream",
+      "bloomberg tv live stream",
+      "france 24 live stream english",
+      "dw english live",
+      "al jazeera english live stream",
+      "nhk world japan live",
+      "red bull tv live",
       // Channel-Specific Keywords
       `${channel.name} live`,
       `${channel.name} live stream`,
       `${channel.name} online free`,
       `${channel.hindiName} लाइव`,
-      // BuzzClips Brand Variations & Permutations
+      // BuzzClips Brand Variations
       "buzzclips tv",
       "buzz clips tv",
-      "buzzclip tv",
-      "buzz clip tv",
-      "buzzclips live tv",
-      "buzz clips live tv",
       "buzzclip live tv",
-      "buzz clips live",
-      "buzzclip live",
-      "buzzclips tv streaming",
-      "buzz clips tv streaming",
-      "watch buzzclips tv",
-      "watch buzz clips tv",
       "buzzclips free tv",
-      "buzz clips free tv",
-      "buzzclip free tv",
-      "buzzclips live channels",
-      "buzz clips live channels",
+      "buzzclips fta channels",
       ...SEO_KEYWORD_GROUPS.HINDI_REGIONAL,
     ],
     alternates: {
@@ -116,16 +105,16 @@ export async function generateMetadata({
 export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
   const { channel: channelId } = await searchParams;
   const activeChannel =
-    INDIAN_LIVE_CHANNELS.find((c) => c.id === channelId) ||
-    INDIAN_LIVE_CHANNELS[0];
+    ALL_LIVE_CHANNELS.find((c) => c.id === channelId) ||
+    ALL_LIVE_CHANNELS[0];
 
   const liveTvSchema = generateLiveTvSchema(activeChannel, SITE_URL);
   const breadcrumbsSchema = generateBreadcrumbSchema([
     { name: "Home", url: SITE_URL },
     { name: "BuzzClips TV (लाइव टीवी)", url: `${SITE_URL}/tv` },
-    { name: activeChannel.name, url: `${SITE_URL}/tv?channel=${activeChannel.id}` },
+    { name: `${activeChannel.name} (${activeChannel.country})`, url: `${SITE_URL}/tv?channel=${activeChannel.id}` },
   ]);
-  const channelListSchema = generateChannelListSchema(INDIAN_LIVE_CHANNELS, SITE_URL);
+  const channelListSchema = generateChannelListSchema(ALL_LIVE_CHANNELS, SITE_URL);
   const faqSchema = generateLiveTvFaqSchema(SITE_URL);
 
   return (
@@ -173,17 +162,17 @@ export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
         <LiveTvClient initialChannelId={activeChannel.id} />
       </Suspense>
 
-      {/* Crawlable Semantic SEO Guide Section for Indian TV & Free Streaming Rankings */}
+      {/* Crawlable Semantic SEO Guide Section for Worldwide FTA & Indian TV */}
       <section className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-10 border-t border-border/40 mt-10 space-y-8">
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Radio className="w-5 h-5 text-red-500 animate-pulse" />
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Watch Free Indian TV Online • 12+ Official HD Live Streams
+              Watch Free-To-Air Live TV Online • {ALL_LIVE_CHANNELS.length}+ Official Worldwide HD Streams
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-4xl">
-            Welcome to <strong>BuzzClips TV</strong>, your complete guide to <strong>free Indian TV</strong> streaming online. Watch official, legal public broadcasts from Prasar Bharati (Doordarshan) and the Parliament of India, including <strong>DD National</strong>, <strong>DD Sports</strong> (live cricket, hockey, and Olympic events), <strong>DD News</strong>, and <strong>Sansad TV</strong>. All streams are broadcast in high-definition (HD) adaptive bitrate HLS with zero registration, zero fees, and zero buffering.
+            Welcome to <strong>BuzzClips TV</strong>, your complete guide to <strong>free live television</strong> streaming online. Watch official, legal Free-To-Air (FTA) public broadcasts from India, USA, UK, Europe, Japan, South Korea, and international networks. Stream <strong>DD Sports</strong> (live cricket, hockey, and tournaments), <strong>Bloomberg Originals</strong>, <strong>France 24</strong>, <strong>DW English</strong>, <strong>Al Jazeera</strong>, <strong>NHK World Japan</strong>, and <strong>Red Bull TV</strong> in high-definition adaptive HLS with zero registration and zero buffering.
           </p>
         </div>
 
@@ -191,25 +180,28 @@ export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
         <div className="space-y-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
-            Trending Free Indian TV Searches
+            Trending Free-To-Air TV Searches
           </h3>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "Free Indian TV", href: "/tv" },
+              { label: "Free Live TV Worldwide", href: "/tv" },
               { label: "DD Sports Live Cricket", href: "/tv?channel=dd-sports" },
+              { label: "Bloomberg Originals", href: "/tv?channel=bloomberg-originals" },
+              { label: "France 24 English", href: "/tv?channel=france-24-en" },
+              { label: "DW English (Germany)", href: "/tv?channel=dw-english" },
+              { label: "Al Jazeera English", href: "/tv?channel=al-jazeera-en" },
+              { label: "NHK World Japan", href: "/tv?channel=nhk-world-japan" },
+              { label: "Red Bull TV Live Sports", href: "/tv?channel=red-bull-tv" },
+              { label: "Scripps News 24/7", href: "/tv?channel=scripps-news" },
+              { label: "Court TV Live Trials", href: "/tv?channel=court-tv" },
+              { label: "Deluxe Music", href: "/tv?channel=deluxe-music" },
+              { label: "Arirang TV Korea", href: "/tv?channel=arirang-tv" },
+              { label: "CNA Singapore News", href: "/tv?channel=cna-singapore" },
               { label: "DD National Live Stream", href: "/tv?channel=dd-national" },
               { label: "DD News 24x7", href: "/tv?channel=dd-news" },
-              { label: "Sansad TV Lok Sabha Live", href: "/tv?channel=sansad-tv-loksabha" },
-              { label: "Sansad TV Rajya Sabha", href: "/tv?channel=sansad-tv-rajyasabha" },
-              { label: "DD India Live Stream", href: "/tv?channel=dd-india" },
-              { label: "DD Kisan Live", href: "/tv?channel=dd-kisan" },
-              { label: "DD Bharati Culture", href: "/tv?channel=dd-bharati" },
-              { label: "DD Retro Classics", href: "/tv?channel=dd-retro" },
-              { label: "DD Urdu Live", href: "/tv?channel=dd-urdu" },
-              { label: "Watch Indian TV Online Free", href: "/tv" },
-              { label: "Hindi Live TV", href: "/tv" },
-              { label: "DD Free Dish Online", href: "/tv" },
-              { label: "Free Video Streaming", href: "/" },
+              { label: "Sansad TV Lok Sabha", href: "/tv?channel=sansad-tv-loksabha" },
+              { label: "24H Free Movies", href: "/tv?channel=free-movies-24h" },
+              { label: "Baby Shark TV Kids", href: "/tv?channel=baby-shark-tv" },
             ].map((topic) => (
               <Link
                 key={topic.label}
@@ -240,17 +232,17 @@ export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
             </div>
             <h4 className="text-sm font-semibold text-foreground">Fast Buffer-Free HLS</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Adaptive bitrate streaming adjusts dynamically between 1080p, 720p, and 480p on any mobile or WiFi network.
+              Adaptive bitrate streaming adjusts dynamically between 1080p, 720p, and 480p on any mobile or broadband network.
             </p>
           </div>
 
           <div className="p-4 rounded-xl border border-border/50 bg-card/40 space-y-2">
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold">
-              <ShieldCheck className="w-4 h-4" />
+              <Globe className="w-4 h-4" />
             </div>
-            <h4 className="text-sm font-semibold text-foreground">Authorized Legal Streams</h4>
+            <h4 className="text-sm font-semibold text-foreground">Global FTA Broadcasters</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Legitimate public service streams provided directly by national broadcasters and parliamentary networks.
+              Legitimate public service streams provided directly by national broadcasters and authorized international networks.
             </p>
           </div>
         </div>
@@ -258,4 +250,3 @@ export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
     </>
   );
 }
-

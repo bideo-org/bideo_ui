@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { LiveChannel, INDIAN_LIVE_CHANNELS } from "@/constants/liveChannels";
+import { LiveChannel, ALL_LIVE_CHANNELS } from "@/constants/liveChannels";
 import { LiveTvPlayer } from "./LiveTvPlayer";
 import { ChannelGuide } from "./ChannelGuide";
 import { Card, CardContent } from "@/components/ui/card";
-import { Radio, ShieldCheck, Zap, Sparkles, Tv } from "lucide-react";
+import { Radio, ShieldCheck, Zap, Sparkles, Tv, Globe } from "lucide-react";
 import clsx from "clsx";
 
 interface LiveTvClientProps {
@@ -20,8 +20,8 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
   // Find initial channel
   const channelParam = searchParams.get("channel") || initialChannelId;
   const initialChannel =
-    INDIAN_LIVE_CHANNELS.find((c) => c.id === channelParam) ||
-    INDIAN_LIVE_CHANNELS[0];
+    ALL_LIVE_CHANNELS.find((c) => c.id === channelParam) ||
+    ALL_LIVE_CHANNELS[0];
 
   const [activeChannel, setActiveChannel] = useState<LiveChannel>(initialChannel);
 
@@ -29,7 +29,7 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
   useEffect(() => {
     const param = searchParams.get("channel");
     if (param && param !== activeChannel.id) {
-      const match = INDIAN_LIVE_CHANNELS.find((c) => c.id === param);
+      const match = ALL_LIVE_CHANNELS.find((c) => c.id === param);
       if (match) {
         setActiveChannel(match);
       }
@@ -43,25 +43,25 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8">
-      {/* "Made in India" Sleek Hero Banner */}
+      {/* Sleek Global FTA Hero Banner */}
       <div className="relative rounded-2xl overflow-hidden p-5 sm:p-6 bg-gradient-to-r from-orange-500/10 via-background to-emerald-500/10 border border-border/50 backdrop-blur-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-orange-500/15 text-orange-500 border border-orange-500/30">
-                <span>🇮🇳</span>
-                <span>Made in India • Built for India</span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/30">
+                <Globe className="w-3.5 h-3.5" />
+                <span>Worldwide Free-To-Air TV</span>
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                100% Free Public TV
+                100% Free &amp; Legal Public TV
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground">
-              Indian Free-To-Air Live TV & Public Broadcasts
+              Global Free-To-Air Live TV &amp; World Broadcasts
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
-              Stream official Doordarshan national, news, sports, and parliamentary channels with zero buffer, zero login, and adaptive HLS playback.
+              Stream official FTA national, news, sports, entertainment, and documentary channels from India, USA, UK, Europe, Japan, and worldwide with zero login and adaptive HLS playback.
             </p>
           </div>
 
@@ -70,7 +70,7 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
               <Radio className="w-4 h-4 text-red-500 animate-pulse" />
               <div className="text-left">
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Status</p>
-                <p className="text-xs font-semibold text-foreground">12 Channels Live</p>
+                <p className="text-xs font-semibold text-foreground">{ALL_LIVE_CHANNELS.length} Channels Live</p>
               </div>
             </div>
           </div>
@@ -95,14 +95,14 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
               </span>
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none -mx-1 px-1">
-              {INDIAN_LIVE_CHANNELS.map((ch) => {
+              {ALL_LIVE_CHANNELS.map((ch) => {
                 const isCur = activeChannel.id === ch.id;
                 return (
                   <button
                     key={ch.id}
                     onClick={() => handleSelectChannel(ch)}
                     className={clsx(
-                      "flex items-center gap-2 px-3 py-2 rounded-xl border shrink-0 text-left transition-all active:scale-95",
+                      "flex items-center gap-2 px-3 py-2 rounded-xl border shrink-0 text-left transition-all active:scale-95 cursor-pointer",
                       isCur
                         ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold ring-1 ring-primary/40"
                         : "bg-card/80 hover:bg-card text-foreground border-border/50"
@@ -118,6 +118,7 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
                     >
                       {ch.channelNumber}
                     </span>
+                    <span className="text-sm shrink-0 leading-none">{ch.countryFlag}</span>
                     <div className="truncate max-w-[110px]">
                       <p className="text-xs truncate leading-tight font-bold">
                         {ch.name}
@@ -128,7 +129,7 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
                           isCur ? "opacity-80" : "text-muted-foreground"
                         )}
                       >
-                        {ch.hindiName}
+                        {ch.category}
                       </p>
                     </div>
                   </button>
@@ -143,7 +144,7 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
           <Card className="border border-border/50 bg-card/75 backdrop-blur-sm rounded-2xl p-4 sm:p-5 shadow-lg shadow-black/5">
             <CardContent className="p-0">
               <ChannelGuide
-                channels={INDIAN_LIVE_CHANNELS}
+                channels={ALL_LIVE_CHANNELS}
                 activeChannel={activeChannel}
                 onSelectChannel={handleSelectChannel}
               />
@@ -167,10 +168,10 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
         <div className="p-4 rounded-xl bg-card/40 border border-border/40 space-y-1.5">
           <div className="flex items-center gap-2 text-emerald-500 font-semibold text-sm">
             <ShieldCheck className="w-4 h-4" />
-            <span>Official & Legal FTA Channels</span>
+            <span>Official &amp; Legal FTA Channels</span>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Broadcasting authorized public service feeds from Prasar Bharati and recognized Indian news networks.
+            Broadcasting authorized Free-To-Air public feeds from national broadcasters and international news networks.
           </p>
         </div>
 
@@ -180,7 +181,7 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
             <span>No Subscription, No Sign-In</span>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Completely free to watch for everyone in India and abroad. Tap any channel and start streaming immediately.
+            Completely free to watch for everyone worldwide. Tap any channel and start streaming immediately.
           </p>
         </div>
       </div>
@@ -195,26 +196,27 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
             id="about-buzzclips-tv-title"
             className="text-lg sm:text-xl font-bold tracking-tight text-foreground"
           >
-            About BuzzClips TV — Free Indian Live TV Streaming
+            About BuzzClips TV — Free Worldwide &amp; Indian Live TV Streaming
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            BuzzClips TV is India&apos;s premier web-first live TV streaming portal, offering instant, unrestricted access to official Indian Free-To-Air (FTA) national broadcasts, public service television, breaking news, live parliamentary debates, and premier sports. Powered by ultra-low latency adaptive HLS, BuzzClips TV delivers crisp 1080p Full HD video playback with zero buffering and zero login requirements.
+            BuzzClips TV is a premier web-first live television streaming portal offering instant, unrestricted access to official Free-To-Air (FTA) national broadcasts, international breaking news, sports networks, movies, music, and cultural channels from across the globe. Powered by ultra-low latency adaptive HLS, BuzzClips TV delivers crisp Full HD playback with zero buffering and zero login requirements.
           </p>
         </div>
 
         {/* Channel Directory Grid for SEO Indexing */}
         <div className="space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Official Indian Live TV Channels Lineup
+            Official Free-To-Air Live TV Lineup ({ALL_LIVE_CHANNELS.length} Channels)
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            {INDIAN_LIVE_CHANNELS.map((ch) => (
+            {ALL_LIVE_CHANNELS.map((ch) => (
               <button
                 key={ch.id}
                 onClick={() => handleSelectChannel(ch)}
-                className="text-left p-2.5 rounded-xl border border-border/40 bg-card/40 hover:bg-card hover:border-primary/40 transition-all group"
+                className="text-left p-2.5 rounded-xl border border-border/40 bg-card/40 hover:bg-card hover:border-primary/40 transition-all group cursor-pointer"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs leading-none">{ch.countryFlag}</span>
                   <span className="font-mono text-[10px] font-bold text-muted-foreground group-hover:text-primary">
                     CH {ch.channelNumber}
                   </span>
@@ -224,7 +226,7 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
                   {ch.name}
                 </p>
                 <p className="text-[10px] text-muted-foreground truncate">
-                  {ch.hindiName}
+                  {ch.country} • {ch.category}
                 </p>
               </button>
             ))}
@@ -243,7 +245,7 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
                 <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
               </summary>
               <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                BuzzClips TV is a free online streaming service by BuzzClips providing live Indian television channels, including DD National, DD Sports, DD News, Sansad TV, and regional public broadcasts, directly in your browser.
+                BuzzClips TV is a free online streaming service by BuzzClips providing live television channels worldwide, including Doordarshan national, DD Sports, Bloomberg Originals, France 24, DW English, Al Jazeera, NHK World Japan, Red Bull TV, and regional public broadcasts, directly in your browser.
               </p>
             </details>
 
@@ -253,17 +255,17 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
                 <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
               </summary>
               <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                Yes, 100%. All channels featured on BuzzClips TV are official Free-To-Air (FTA) public broadcasts transmitted by Prasar Bharati and authorized news networks. No paid subscription, account registration, or payment is ever required.
+                Yes, 100%. All channels featured on BuzzClips TV are official Free-To-Air (FTA) public broadcasts transmitted by recognized national public broadcasters and authorized networks. No paid subscription, account registration, or payment is ever required.
               </p>
             </details>
 
             <details className="group p-3.5 rounded-xl border border-border/40 bg-card/30 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex items-center justify-between cursor-pointer font-semibold text-xs text-foreground group-open:text-primary">
-                <span>What channels can I watch on BuzzClips TV?</span>
+                <span>What channels and countries are available?</span>
                 <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
               </summary>
               <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                You can watch 12+ live television channels, including DD National (डीडी नेशनल), DD News, DD India, DD Sports, DD Bharati, Sansad TV Lok Sabha, Sansad TV Rajya Sabha, and major national news networks in HD.
+                BuzzClips TV features over 30 live channels from India, United States, United Kingdom, France, Germany, Japan, South Korea, Singapore, Qatar, and Turkey across categories like News, Sports, Movies, Science, Kids, Music, and Culture.
               </p>
             </details>
 
@@ -282,3 +284,4 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
     </div>
   );
 }
+export default LiveTvClient;

@@ -408,7 +408,7 @@ export function generateLiveTvSchema(
         },
         areaServed: {
           "@type": "Country",
-          name: "India",
+          name: channel.country || "India",
         },
         inLanguage: channel.language,
         isLiveBroadcast: true,
@@ -419,7 +419,7 @@ export function generateLiveTvSchema(
       {
         "@type": "BroadcastEvent",
         "@id": `${channelUrl}#broadcast-event`,
-        name: `${channel.name} - 24x7 Live Stream Online | BuzzClips India`,
+        name: `${channel.name} - 24x7 Live Stream Online | BuzzClips TV`,
         isLiveBroadcast: true,
         startDate: "2026-01-01T00:00:00+05:30",
         eventStatus: "https://schema.org/EventScheduled",
@@ -448,7 +448,7 @@ export function generateLiveTvSchema(
 }
 
 /**
- * Schema.org ItemList structured data for the Indian Live Channel Guide directory.
+ * Schema.org ItemList structured data for the Free-To-Air Live Channel Guide directory.
  */
 export function generateChannelListSchema(
   channels: LiveChannel[],
@@ -457,13 +457,13 @@ export function generateChannelListSchema(
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Indian Free-To-Air Live TV Channels Directory",
-    description: "Official legal Indian Free-To-Air TV broadcast channels streaming online in HD.",
+    name: "Free-To-Air Live TV Channels Directory",
+    description: "Official legal worldwide Free-To-Air TV broadcast channels streaming online in HD.",
     numberOfItems: channels.length,
     itemListElement: channels.map((channel, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      name: `${channel.name} (${channel.hindiName})`,
+      name: `${channel.name} (${channel.country})`,
       url: `${siteUrl}/tv?channel=${channel.id}`,
       description: channel.description,
       image: channel.logo,

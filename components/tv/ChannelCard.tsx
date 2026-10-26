@@ -16,13 +16,17 @@ interface ChannelCardProps {
 export function ChannelCard({ channel, isActive, onSelect }: ChannelCardProps) {
   const [hasImgError, setHasImgError] = useState(false);
 
-  // Fallback badge gradient based on channel ID
-  const getBadgeGradient = (id: string) => {
-    if (id.includes("news")) return "from-red-600 to-rose-700";
-    if (id.includes("sports")) return "from-emerald-600 to-teal-700";
-    if (id.includes("sansad")) return "from-amber-600 to-orange-700";
+  // Fallback badge gradient based on channel ID or category
+  const getBadgeGradient = (id: string, category: string) => {
+    if (id.includes("news") || category === "NEWS") return "from-red-600 to-rose-700";
+    if (id.includes("sports") || category === "SPORTS") return "from-emerald-600 to-teal-700";
+    if (id.includes("sansad") || category === "NATIONAL") return "from-amber-600 to-orange-700";
+    if (category === "ENTERTAINMENT") return "from-violet-600 to-purple-700";
+    if (category === "DOCUMENTARY") return "from-cyan-600 to-blue-700";
+    if (category === "MUSIC") return "from-pink-600 to-rose-700";
+    if (category === "KIDS") return "from-amber-500 to-yellow-600";
     if (id.includes("kisan")) return "from-green-600 to-emerald-700";
-    if (id.includes("bharati")) return "from-purple-600 to-indigo-700";
+    if (id.includes("bharati") || category === "CULTURE") return "from-purple-600 to-indigo-700";
     return "from-blue-600 to-indigo-700";
   };
 
@@ -41,7 +45,7 @@ export function ChannelCard({ channel, isActive, onSelect }: ChannelCardProps) {
       aria-label={`Watch ${channel.name} (${channel.hindiName}) Live TV Stream`}
       aria-current={isActive ? "page" : undefined}
       className={clsx(
-        "group relative w-full text-left rounded-xl p-3 border transition-all duration-200 overflow-hidden flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary select-none",
+        "group relative w-full text-left rounded-xl p-3 border transition-all duration-200 overflow-hidden flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary select-none cursor-pointer",
         isActive
           ? "bg-primary/10 border-primary shadow-md shadow-primary/10 ring-1 ring-primary/40"
           : "bg-card/70 hover:bg-card border-border/40 hover:border-border/80"
@@ -74,13 +78,13 @@ export function ChannelCard({ channel, isActive, onSelect }: ChannelCardProps) {
             unoptimized
             onError={() => setHasImgError(true)}
             sizes="48px"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-contain p-1 group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div
             className={clsx(
               "w-full h-full bg-gradient-to-br flex flex-col items-center justify-center text-white font-bold p-1 text-center select-none",
-              getBadgeGradient(channel.id)
+              getBadgeGradient(channel.id, channel.category)
             )}
           >
             <span className="text-[10px] font-black tracking-wider leading-none">
@@ -97,6 +101,9 @@ export function ChannelCard({ channel, isActive, onSelect }: ChannelCardProps) {
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 truncate">
+            <span className="text-sm leading-none shrink-0" title={channel.country}>
+              {channel.countryFlag}
+            </span>
             <h3
               className={clsx(
                 "text-sm font-bold truncate leading-tight transition-colors",
@@ -105,9 +112,11 @@ export function ChannelCard({ channel, isActive, onSelect }: ChannelCardProps) {
             >
               {channel.name}
             </h3>
-            <span className="text-[11px] text-muted-foreground font-medium shrink-0">
-              ({channel.hindiName})
-            </span>
+            {channel.hindiName && (
+              <span className="text-[11px] text-muted-foreground font-medium shrink-0 truncate max-w-[100px]">
+                ({channel.hindiName})
+              </span>
+            )}
           </div>
 
           {/* Active Live Indicator or Resolution */}
@@ -138,8 +147,8 @@ export function ChannelCard({ channel, isActive, onSelect }: ChannelCardProps) {
           >
             {channel.category}
           </Badge>
-          <span className="text-[10px] text-muted-foreground/80">
-            {channel.language.join(", ")}
+          <span className="text-[10px] text-muted-foreground/80 truncate max-w-[120px]">
+            {channel.country} • {channel.language[0]}
           </span>
           {channel.badgeText && (
             <span className="text-[9px] text-primary/80 font-medium ml-auto hidden sm:inline-block">

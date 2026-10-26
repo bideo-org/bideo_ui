@@ -28,8 +28,8 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${channel.name} Live Stream - BuzzClips India`,
-          text: `Watch ${channel.name} (${channel.hindiName}) live free on BuzzClips!`,
+          title: `${channel.name} Live Stream - BuzzClips TV`,
+          text: `Watch ${channel.name} (${channel.hindiName || channel.name}) live free on BuzzClips TV!`,
           url,
         });
         return;
@@ -62,16 +62,21 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
 
       {/* Channel Metadata Card */}
       <div className="p-3.5 sm:p-4 rounded-xl bg-card/75 border border-border/40 backdrop-blur-sm shadow-sm space-y-2 sm:space-y-2.5">
-        {/* Row 1: Channel Title, Hindi Name, and Share Action on same row */}
+        {/* Row 1: Channel Title, Hindi/Local Name, and Share Action on same row */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xl sm:text-2xl leading-none" title={channel.country}>
+                {channel.countryFlag}
+              </span>
               <h1 className="text-base sm:text-xl font-bold text-foreground leading-tight">
                 {channel.name}
               </h1>
-              <span className="text-xs sm:text-sm font-semibold text-primary font-mono shrink-0">
-                ({channel.hindiName})
-              </span>
+              {channel.hindiName && (
+                <span className="text-xs sm:text-sm font-semibold text-primary font-mono shrink-0">
+                  ({channel.hindiName})
+                </span>
+              )}
             </div>
           </div>
 
@@ -79,7 +84,7 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
             size="sm"
             variant="outline"
             onClick={handleShare}
-            className="gap-1.5 text-xs h-7 sm:h-8 px-2.5 sm:px-3 rounded-full bg-muted/40 hover:bg-muted border-border/50 shrink-0"
+            className="gap-1.5 text-xs h-7 sm:h-8 px-2.5 sm:px-3 rounded-full bg-muted/40 hover:bg-muted border-border/50 shrink-0 cursor-pointer"
             title="Share Live TV Channel"
           >
             {isCopied ? (
@@ -102,14 +107,23 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block" />
             Live 24x7
           </span>
-          <Badge variant="outline" className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide bg-primary/10 text-primary border-primary/20 shrink-0">
+          <Badge
+            variant="outline"
+            className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide bg-primary/10 text-primary border-primary/20 shrink-0"
+          >
             {channel.category}
           </Badge>
           <Badge variant="secondary" className="text-[10px] sm:text-[11px] shrink-0">
+            {channel.countryFlag} {channel.country}
+          </Badge>
+          <Badge variant="secondary" className="text-[10px] sm:text-[11px] shrink-0 hidden sm:inline-flex">
             {channel.broadcaster}
           </Badge>
           <span className="text-[11px] text-muted-foreground font-mono hidden sm:inline">
             CH {channel.channelNumber}
+          </span>
+          <span className="text-[11px] text-muted-foreground ml-auto hidden md:inline">
+            {channel.language.join(", ")}
           </span>
         </div>
 
