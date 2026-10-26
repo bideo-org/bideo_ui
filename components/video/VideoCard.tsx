@@ -46,7 +46,7 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
   };
 
   const handleMouseEnter = () => {
-    if (videoRef.current) {
+    if (videoRef.current && videoRef.current.readyState >= 2) {
       videoRef.current.currentTime = 0;
       videoRef.current.play()?.catch(() => {});
     }
@@ -55,7 +55,11 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
   const handleMouseLeave = () => {
     if (videoRef.current) {
       videoRef.current.pause();
-      videoRef.current.currentTime = 0;
+      try {
+        videoRef.current.currentTime = 0;
+      } catch {
+        // ignore
+      }
     }
   };
 
@@ -82,7 +86,7 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
       onMouseLeave={handleMouseLeave}
     >
       {/* Thumbnail with hover preview */}
-      <Link href={videoHref} className="block">
+      <Link href={videoHref} prefetch={true} className="block">
         <div className="relative rounded-2xl overflow-hidden aspect-video bg-black/5 dark:bg-white/5 ring-1 ring-border/50 transition-all duration-300 group-hover:ring-2 group-hover:ring-primary/40 group-hover:shadow-xl group-hover:shadow-primary/5">
           {/* Poster/Thumbnail */}
           <video
@@ -156,7 +160,7 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
         </Link>
 
         <div className="flex-1 min-w-0">
-          <Link href={videoHref}>
+          <Link href={videoHref} prefetch={true}>
             <h3 className="text-sm font-semibold line-clamp-2 leading-snug text-foreground group-hover:text-primary transition-colors duration-200">
               {video.video_title}
             </h3>

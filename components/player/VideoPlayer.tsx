@@ -28,6 +28,7 @@ import {
   SkipForward,
   RefreshCw,
   Languages,
+  Loader2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -90,6 +91,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const [seekRipple, setSeekRipple] = useState<"forward" | "backward" | null>(null);
     const [centerPulse, setCenterPulse] = useState<"play" | "pause" | null>(null);
     const [isReloading, setIsReloading] = useState(false);
+    const [isBuffering, setIsBuffering] = useState(true);
 
     // Live DVR Sliding Window State
     const [liveRange, setLiveRange] = useState<{ start: number; end: number; window: number }>({
@@ -111,12 +113,38 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const [hoverPos, setHoverPos] = useState<number>(0);
     const [liveHoverBehind, setLiveHoverBehind] = useState<number | null>(null);
 
-    // Proxy the m3u8 source URL
-    const proxySrc = src
-      ? src.startsWith("/proxy")
-        ? src
-        : `/proxy/proxy-m3u8?url=${encodeURIComponent(src)}`
-      : "";
+    // Optimized source resolution: only proxy if external cross-origin m3u8
+    const proxySrc = React.useMemo(() => {
+      if (!src) return "";
+      if (src.startsWith("/proxy")) return src;
+
+      // Relative URLs never need proxying
+      if (src.startsWith("/") && !src.startsWith("//")) return src;
+
+      try {
+        const parsed = new URL(src);
+        const host = parsed.hostname.toLowerCase();
+        // Same-origin or known CORS-enabled BuzzClips domains stream directly
+        if (
+          host === "localhost" ||
+          host === "127.0.0.1" ||
+          host.endsWith(".buzzclips.app") ||
+          host.endsWith(".bideo.tech")
+        ) {
+          return src;
+        }
+      } catch {
+        // Not a standard URL, fallback
+      }
+
+      // External streams (e.g. FTA Live TV without permissive CORS) go through proxy
+      return `/proxy/proxy-m3u8?url=${encodeURIComponent(src)}`;
+    }, [src]);
+
+    // Reset buffering indicator whenever stream source changes
+    useEffect(() => {
+      setIsBuffering(true);
+    }, [proxySrc]);
 
     // Calculate live DVR seekable range
     const getLiveRange = useCallback(() => {
@@ -183,9 +211,14 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         const hls = new Hls({
           enableWorker: true,
           lowLatencyMode: isLive,
-          backBufferLength: isLive ? 600 : 90, // Keep 10 mins of DVR buffer in memory!
-          maxBufferLength: isLive ? 60 : 30,
-          maxMaxBufferLength: 120,
+          testBandwidth: false, // Prevents downloading test fragments across multiple renditions!
+          startFragPrefetch: true, // Immediately prefetch chunk 0 of the chosen rendition
+          capLevelToPlayerSize: true, // Don't download higher resolutions than container viewport
+          abrEwmaDefaultEstimate: 2500000, // 2.5 Mbps sensible start estimate (clean ~720p without probing)
+          backBufferLength: isLive ? 300 : 60,
+          maxBufferLength: isLive ? 30 : 20,
+          maxMaxBufferLength: isLive ? 60 : 40,
+          maxBufferSize: 30 * 1000 * 1000,
           liveDurationInfinity: isLive,
           liveSyncDurationCount: 3,
           liveMaxLatencyDurationCount: 15,
@@ -205,6 +238,25 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
           if (isLive) {
             setLiveRange(getLiveRange());
+          }
+        });
+
+        // Track fragment and buffer progress for seamless loading indicator
+        hls.on(Hls.Events.FRAG_LOADING, () => {
+          if (video.readyState < 3) {
+            setIsBuffering(true);
+          }
+        });
+
+        hls.on(Hls.Events.FRAG_LOADED, () => {
+          if (video.readyState >= 3) {
+            setIsBuffering(false);
+          }
+        });
+
+        hls.on(Hls.Events.BUFFER_APPENDED, () => {
+          if (video.readyState >= 3) {
+            setIsBuffering(false);
           }
         });
 
@@ -234,6 +286,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           if (err.fatal) {
             switch (err.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
+                setIsBuffering(true);
                 hls.startLoad();
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
@@ -661,8 +714,20 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           playsInline
           onClick={togglePlay}
           onDoubleClick={toggleFullscreen}
-          onPlay={() => setIsPlaying(true)}
+          onPlay={() => {
+            setIsPlaying(true);
+            setIsBuffering(false);
+          }}
           onPause={() => setIsPlaying(false)}
+          onLoadStart={() => setIsBuffering(true)}
+          onWaiting={() => setIsBuffering(true)}
+          onSeeking={() => setIsBuffering(true)}
+          onCanPlay={() => setIsBuffering(false)}
+          onPlaying={() => {
+            setIsPlaying(true);
+            setIsBuffering(false);
+          }}
+          onSeeked={() => setIsBuffering(false)}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={() => {
             if (videoRef.current) {
@@ -672,6 +737,26 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           }}
           className="w-full h-full object-contain cursor-pointer"
         />
+
+        {/* Buffering & First Chunk Loading Overlay */}
+        {isBuffering && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300">
+            <div className="flex flex-col items-center gap-3 px-6 py-4 rounded-2xl bg-black/70 backdrop-blur-md border border-white/10 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="relative w-12 h-12 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping opacity-30" />
+                <Loader2 className="w-9 h-9 text-primary animate-spin" />
+              </div>
+              <div className="flex flex-col items-center text-center select-none">
+                <span className="text-xs font-semibold text-white tracking-wide">
+                  {isLive ? "Connecting to live stream..." : "Loading video..."}
+                </span>
+                <span className="text-[10px] text-zinc-400 mt-0.5">
+                  Waiting for first chunk
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Center Ripple Icons for Tap / Playback Feedback */}
         {centerPulse && (

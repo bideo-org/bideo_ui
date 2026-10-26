@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { GoogleSignInButton } from "@/components/user/GoogleSignInButton";
-import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider, signInWithPopup } from "@/lib/firebase";
 import { googleLogin } from "@/utility/requests";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -17,26 +17,11 @@ jest.mock("@/store/auth-context", () => ({
   useAuth: jest.fn(),
 }));
 
-// Mock firebase/auth
-jest.mock("firebase/auth", () => ({
-  signInWithPopup: jest.fn(),
-  GoogleAuthProvider: jest.fn().mockImplementation(() => ({
-    setCustomParameters: jest.fn(),
-  })),
-  getAuth: jest.fn(),
-}));
-
-// Mock firebase/app
-jest.mock("firebase/app", () => ({
-  initializeApp: jest.fn(),
-  getApps: jest.fn(() => []),
-  getApp: jest.fn(),
-}));
-
 // Mock @/lib/firebase
 jest.mock("@/lib/firebase", () => ({
   auth: {},
   googleProvider: {},
+  signInWithPopup: jest.fn(),
 }));
 
 // Mock @/utility/requests

@@ -37,7 +37,7 @@ describe("Video Requests Utility", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         `${api_instance}/vid/slug/test-video`,
-        { cache: "no-store" }
+        { next: { revalidate: 60 } }
       );
       expect(result).toEqual(mockVideo);
     });
@@ -52,7 +52,7 @@ describe("Video Requests Utility", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         `${api_instance}/vid/slug/test%20video%20with%20spaces`,
-        { cache: "no-store" }
+        { next: { revalidate: 60 } }
       );
     });
 
@@ -85,7 +85,7 @@ describe("Video Requests Utility", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         `${api_instance}/vid/view/42`,
-        { cache: "no-store" }
+        { next: { revalidate: 60 } }
       );
       expect(result).toEqual(mockVideo);
     });

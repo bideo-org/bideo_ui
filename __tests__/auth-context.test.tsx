@@ -27,11 +27,12 @@ jest.mock("@/utility/requests", () => ({
 }));
 
 const TestConsumer = () => {
-  const { token, isAuthenticated, user, login, logout, setUserInfo } =
+  const { token, isAuthenticated, user, login, logout, setUserInfo, isLoaded } =
     useAuth();
 
   return (
     <div>
+      <span data-testid="is-loaded">{isLoaded ? "loaded" : "loading"}</span>
       <span data-testid="auth-status">
         {isAuthenticated ? "authenticated" : "guest"}
       </span>
@@ -102,6 +103,10 @@ describe("AuthContext & AuthProvider", () => {
       </AuthProvider>
     );
 
+    await waitFor(() => {
+      expect(screen.getByTestId("is-loaded")).toHaveTextContent("loaded");
+    });
+
     expect(screen.getByTestId("auth-status")).toHaveTextContent("guest");
     expect(screen.getByTestId("token")).toHaveTextContent("no-token");
     expect(screen.getByTestId("username")).toHaveTextContent("anonymous");
@@ -113,6 +118,10 @@ describe("AuthContext & AuthProvider", () => {
         <TestConsumer />
       </AuthProvider>
     );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("is-loaded")).toHaveTextContent("loaded");
+    });
 
     await act(async () => {
       fireEvent.click(screen.getByTestId("login-btn"));
@@ -139,6 +148,10 @@ describe("AuthContext & AuthProvider", () => {
       </AuthProvider>
     );
 
+    await waitFor(() => {
+      expect(screen.getByTestId("is-loaded")).toHaveTextContent("loaded");
+    });
+
     await act(async () => {
       fireEvent.click(screen.getByTestId("set-user-btn"));
     });
@@ -152,6 +165,10 @@ describe("AuthContext & AuthProvider", () => {
         <TestConsumer />
       </AuthProvider>
     );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("is-loaded")).toHaveTextContent("loaded");
+    });
 
     await act(async () => {
       fireEvent.click(screen.getByTestId("login-btn"));

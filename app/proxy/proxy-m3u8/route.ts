@@ -133,7 +133,7 @@ export async function GET(req: NextRequest) {
     const isLiveStream = !text.includes("#EXT-X-ENDLIST");
     const cacheHeader = isLiveStream
       ? "no-cache, no-store, must-revalidate"
-      : "public, max-age=60";
+      : "public, max-age=3600, s-maxage=86400";
 
     return new NextResponse(rewrittenText, {
       status: 200,

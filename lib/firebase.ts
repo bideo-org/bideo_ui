@@ -25,8 +25,9 @@ export const app: FirebaseApp =
 // Initialize Firebase Auth
 export const auth: Auth = getAuth(app);
 
-// Configure Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: "select_account",
 });
+
+export { signInWithPopup } from "firebase/auth";

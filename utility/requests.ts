@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { api_instance } from "@/global";
 import {
   VideoDTO,
@@ -396,27 +397,27 @@ export async function deleteVideo(
   return res.text();
 }
 
-export const getVideoBySlug = async (slug: string): Promise<VideoDTO> => {
+export const getVideoBySlug = cache(async (slug: string): Promise<VideoDTO> => {
   const res = await fetch(`${api_instance}/vid/slug/${encodeURIComponent(slug)}`, {
-    cache: "no-store",
+    next: { revalidate: 60 },
   });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to load video by slug: ${res.status} - ${text}`);
   }
   return res.json();
-};
+});
 
-export const getVideoById = async (id: string | number): Promise<VideoDTO> => {
+export const getVideoById = cache(async (id: string | number): Promise<VideoDTO> => {
   const res = await fetch(`${api_instance}/vid/view/${id}`, {
-    cache: "no-store",
+    next: { revalidate: 60 },
   });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to load video: ${res.status} - ${text}`);
   }
   return res.json();
-};
+});
 
 export const updateVideoMetadata = async (
   videoId: number,

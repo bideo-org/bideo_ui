@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
       headers: {
         "Content-Type": res.headers.get("Content-Type") || "video/mp2t",
         "Access-Control-Allow-Origin": allowedOrigin,
-        "Cache-Control": "public, max-age=300",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400, immutable",
         Vary: "Origin",
       },
     });
