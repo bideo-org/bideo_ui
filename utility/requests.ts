@@ -960,3 +960,132 @@ export const abortPresignedUpload = async (
 };
 
 
+
+export interface AccountProviderInfo {
+  providerId: string;
+  uid?: string;
+  email?: string;
+  displayName?: string;
+  photoUrl?: string;
+}
+
+export interface AccountSecurityInfo {
+  userId: string;
+  email?: string;
+  emailVerified: boolean;
+  hasPassword: boolean;
+  hasGoogle: boolean;
+  primaryProvider: string;
+  providers: AccountProviderInfo[];
+}
+
+export interface AccountActionResponse {
+  success: boolean;
+  message: string;
+  verificationLink?: string;
+  account?: AccountSecurityInfo;
+}
+
+export const getAccountSecurity = async (
+  token: string
+): Promise<AccountSecurityInfo> => {
+  const res = await fetch(`${api_instance}/user/account`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to fetch account security: ${res.status} - ${errorText}`);
+  }
+  return res.json();
+};
+
+export const updateAccountEmail = async (
+  email: string,
+  token: string
+): Promise<AccountActionResponse> => {
+  const res = await fetch(`${api_instance}/user/account/email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to update email: ${res.status} - ${errorText}`);
+  }
+  return res.json();
+};
+
+export const setAccountPassword = async (
+  newPassword: string,
+  token: string
+): Promise<AccountActionResponse> => {
+  const res = await fetch(`${api_instance}/user/account/password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newPassword }),
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to set password: ${res.status} - ${errorText}`);
+  }
+  return res.json();
+};
+
+export const unlinkGoogleProvider = async (
+  token: string
+): Promise<AccountActionResponse> => {
+  const res = await fetch(`${api_instance}/user/account/providers/google/unlink`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to unlink Google: ${res.status} - ${errorText}`);
+  }
+  return res.json();
+};
+
+export const linkGoogleProvider = async (
+  idToken: string,
+  token: string
+): Promise<AccountActionResponse> => {
+  const res = await fetch(`${api_instance}/user/account/providers/google/link`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ idToken }),
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to link Google: ${res.status} - ${errorText}`);
+  }
+  return res.json();
+};
+
+export const sendEmailVerification = async (
+  token: string
+): Promise<AccountActionResponse> => {
+  const res = await fetch(`${api_instance}/user/account/verify-email`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to send email verification: ${res.status} - ${errorText}`);
+  }
+  return res.json();
+};
