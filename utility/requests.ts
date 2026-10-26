@@ -32,6 +32,31 @@ export interface LoginResponse {
   uid?: string;
 }
 
+export interface GoogleLoginPayload {
+  idToken: string;
+  username?: string;
+  fullName?: string;
+}
+
+export interface GoogleLoginResponse {
+  idToken?: string;
+  refreshToken?: string;
+  uid?: string;
+  isNewUser?: boolean;
+  primaryProvider?: string;
+  providers?: string[];
+  emailVerified?: boolean;
+  user?: {
+    userId: string;
+    username?: string;
+    fullName?: string;
+    user_email?: string;
+    avatar_url?: string;
+    user_role?: string;
+    user_name?: string;
+  };
+}
+
 export interface createUserPayload {
   email: string;
   password: string;
@@ -154,6 +179,45 @@ export const loginUser = async (
     idToken: result.idToken,
     refreshToken: result.refreshToken,
     uid: uid.id,
+  };
+};
+
+export const googleLogin = async (
+  payload: GoogleLoginPayload
+): Promise<GoogleLoginResponse> => {
+  const res = await fetch(`${api_instance}/app/google-login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Google login failed with status ${res.status}: ${errorText}`);
+  }
+
+  const result: GoogleLoginResponse = await res.json();
+  const token = result.idToken || "";
+  const uid = result.user?.userId || "";
+
+  if (token && uid) {
+    await fetch("/ui/auth/setSession", {
+      method: "POST",
+      body: JSON.stringify({
+        token,
+        uid,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  return {
+    ...result,
+    uid,
   };
 };
 

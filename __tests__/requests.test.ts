@@ -930,5 +930,67 @@ describe("Video Requests Utility", () => {
       );
     });
   });
+
+  describe("Google Login & Account Security Requests", () => {
+    it("handles googleLogin successfully and establishes session", async () => {
+      global.fetch = jest.fn().mockImplementation((url) => {
+        if (url === `${api_instance}/app/google-login`) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              idToken: "google-token-123",
+              refreshToken: "google-ref-123",
+              user: { userId: "user-goog-1", fullName: "Google User" },
+              isNewUser: false,
+              providers: ["google.com"],
+            }),
+          });
+        }
+        if (url === "/ui/auth/setSession") {
+          return Promise.resolve({ ok: true, json: async () => ({ success: true }) });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      });
+
+      const { googleLogin } = await import("@/utility/requests");
+      const res = await googleLogin({
+        idToken: "google-raw-token",
+        fullName: "Google User",
+      });
+
+      expect(res.idToken).toBe("google-token-123");
+      expect(res.uid).toBe("user-goog-1");
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/app/google-login`,
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            idToken: "google-raw-token",
+            fullName: "Google User",
+          }),
+        })
+      );
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/ui/auth/setSession",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({ token: "google-token-123", uid: "user-goog-1" }),
+        })
+      );
+    });
+
+    it("throws error when googleLogin fails on backend", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: async () => "Invalid Google ID token",
+      });
+
+      const { googleLogin } = await import("@/utility/requests");
+      await expect(
+        googleLogin({ idToken: "bad-token" })
+      ).rejects.toThrow("Google login failed with status 400: Invalid Google ID token");
+    });
+  });
 });
 

@@ -30,6 +30,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { MESSAGES } from "@/constants/messages";
 import { Eye, EyeOff, Mail, Lock, LogIn, ArrowRight, Loader2 } from "lucide-react";
+import { GoogleSignInButton } from "./GoogleSignInButton";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email, username, or @handle is required"),
@@ -117,7 +118,20 @@ export function LoginForm() {
           Enter your credentials to access your account
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <GoogleSignInButton mode="login" />
+
+        <div className="relative my-3">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-muted-foreground/15" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase tracking-wider">
+            <span className="bg-card px-3 text-muted-foreground/70 font-medium">
+              or continue with
+            </span>
+          </div>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <FormField
@@ -208,15 +222,7 @@ export function LoginForm() {
                 </span>
               )}
             </Button>
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-muted-foreground/10" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-card px-3 text-muted-foreground/60">or</span>
-              </div>
-            </div>
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-sm text-muted-foreground pt-1">
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/signup"

@@ -32,6 +32,7 @@ import { MESSAGES } from "@/constants/messages";
 import { AVATARS } from "@/constants/avatars"; // Adjust the import path as necessary
 import { Eye, EyeOff, Mail, Lock, User, AtSign, ArrowRight, Loader2, UserPlus, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { useUsernameAvailability, cleanHandle } from "@/utility/useUsernameAvailability";
+import { GoogleSignInButton } from "./GoogleSignInButton";
 
 const formSchema = z.object({
   fullName: z.string().max(100, { message: "Name must be under 100 characters" }).optional(),
@@ -97,7 +98,20 @@ export function SignUpForm() {
           Join BuzzClips and start sharing videos
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <GoogleSignInButton mode="signup" />
+
+        <div className="relative my-3">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-muted-foreground/15" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase tracking-wider">
+            <span className="bg-card px-3 text-muted-foreground/70 font-medium">
+              or register with email
+            </span>
+          </div>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             {/* Avatar Selection */}
@@ -302,16 +316,7 @@ export function SignUpForm() {
           </form>
         </Form>
 
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-muted-foreground/10" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-card px-3 text-muted-foreground/60">or</span>
-          </div>
-        </div>
-
-        <div className="text-center text-sm text-muted-foreground">
+        <div className="text-center text-sm text-muted-foreground pt-1">
           Already have an account?{" "}
           <Link
             href="/auth/login"
