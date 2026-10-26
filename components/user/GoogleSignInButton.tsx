@@ -1,9 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { api_instance } from "@/global";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
+import { googleLogin } from "@/utility/requests";
+import { useAuth } from "@/store/auth-context";
+import { toast } from "sonner";
 
 interface GoogleSignInButtonProps {
   mode?: "login" | "signup";
@@ -40,14 +45,55 @@ export function GoogleSignInButton({
   callbackUrl,
 }: GoogleSignInButtonProps) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { login } = useAuth();
 
-  const handleClick = () => {
+  const handleClick = async () => {
     setLoading(true);
-    const targetUrl = new URL(`${api_instance}/app/auth/google`);
-    if (callbackUrl) {
-      targetUrl.searchParams.set("redirect_uri", callbackUrl);
+    try {
+      const credential = await signInWithPopup(auth, googleProvider);
+      const idToken = await credential.user.getIdToken();
+      const fullName = credential.user.displayName || undefined;
+
+      const res = await googleLogin({
+        idToken,
+        fullName,
+      });
+
+      if (!res || !res.idToken) {
+        throw new Error("Failed to authenticate with Google backend");
+      }
+
+      const uid = res.uid || res.user?.userId;
+      if (res.idToken && uid) {
+        await login(res.idToken, uid);
+      }
+
+      toast.success(
+        mode === "signup"
+          ? "Account created and signed in with Google!"
+          : "Signed in with Google successfully!"
+      );
+
+      const destination = callbackUrl || "/";
+      if (router) {
+        router.push(destination);
+        router.refresh();
+      } else if (typeof window !== "undefined") {
+        window.location.href = destination;
+      }
+    } catch (err: any) {
+      if (
+        err?.code === "auth/popup-closed-by-user" ||
+        err?.code === "auth/cancelled-popup-request"
+      ) {
+        return;
+      }
+      console.error("Google sign-in error:", err);
+      toast.error(err?.message || "Google sign in failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    window.location.href = targetUrl.toString();
   };
 
   const label = mode === "signup" ? "Sign up with Google" : "Sign in with Google";
@@ -65,7 +111,7 @@ export function GoogleSignInButton({
       ) : (
         <GoogleIcon className="w-5 h-5 transition-transform duration-200 group-hover:scale-105" />
       )}
-      <span>{loading ? "Redirecting to Google..." : label}</span>
+      <span>{loading ? (mode === "signup" ? "Creating account..." : "Signing in...") : label}</span>
     </Button>
   );
 }
