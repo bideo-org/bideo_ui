@@ -24,6 +24,10 @@ import {
   Check,
   Radio,
   Sliders,
+  SkipBack,
+  SkipForward,
+  RefreshCw,
+  Languages,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -43,12 +47,30 @@ export interface VideoPlayerProps {
   storyboardUrl?: string;
   onTimeUpdate?: () => void;
   isLive?: boolean;
+  onPrevChannel?: () => void;
+  onNextChannel?: () => void;
+  channelName?: string;
+  channelNumber?: string;
+  countryFlag?: string;
 }
 
 const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
-  ({ src, poster, onTimeUpdate, isLive = false }, ref) => {
+  (
+    {
+      src,
+      poster,
+      onTimeUpdate,
+      isLive = false,
+      onPrevChannel,
+      onNextChannel,
+      channelName,
+      channelNumber,
+      countryFlag,
+    },
+    ref
+  ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
@@ -67,14 +89,27 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const [showControls, setShowControls] = useState(true);
     const [seekRipple, setSeekRipple] = useState<"forward" | "backward" | null>(null);
     const [centerPulse, setCenterPulse] = useState<"play" | "pause" | null>(null);
+    const [isReloading, setIsReloading] = useState(false);
+
+    // Live DVR Sliding Window State
+    const [liveRange, setLiveRange] = useState<{ start: number; end: number; window: number }>({
+      start: 0,
+      end: 0,
+      window: 0,
+    });
 
     // Quality levels from HLS
     const [qualityLevels, setQualityLevels] = useState<{ id: number; height: number; bitrate: number }[]>([]);
     const [currentQuality, setCurrentQuality] = useState<number>(-1); // -1 = Auto
 
+    // Audio tracks from HLS
+    const [audioTracks, setAudioTracks] = useState<{ id: number; name: string; lang?: string }[]>([]);
+    const [currentAudioTrack, setCurrentAudioTrack] = useState<number>(-1);
+
     // Hover tooltip state
     const [hoverTime, setHoverTime] = useState<number | null>(null);
     const [hoverPos, setHoverPos] = useState<number>(0);
+    const [liveHoverBehind, setLiveHoverBehind] = useState<number | null>(null);
 
     // Proxy the m3u8 source URL
     const proxySrc = src
@@ -83,7 +118,33 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         : `/proxy/proxy-m3u8?url=${encodeURIComponent(src)}`
       : "";
 
-    // Expose imperative API for parent components (useResumePlayback, etc.)
+    // Calculate live DVR seekable range
+    const getLiveRange = useCallback(() => {
+      const video = videoRef.current;
+      if (!video) return { start: 0, end: 0, window: 0 };
+      try {
+        if (video.seekable && video.seekable.length > 0) {
+          const start = video.seekable.start(0);
+          const end = video.seekable.end(video.seekable.length - 1);
+          return { start, end, window: Math.max(0, end - start) };
+        }
+      } catch {
+        // ignore
+      }
+      const end = hlsRef.current?.liveSyncPosition || video.duration || 0;
+      const start = Math.max(0, end - 120);
+      return { start, end, window: Math.max(0, end - start) };
+    }, []);
+
+    // How far behind the live broadcast edge are we?
+    const currentLiveEnd =
+      liveRange.end > 0
+        ? liveRange.end
+        : hlsRef.current?.liveSyncPosition || duration || currentTime;
+    const behindSeconds = isLive ? Math.max(0, currentLiveEnd - currentTime) : 0;
+    const isAtLiveEdge = isLive ? behindSeconds <= 6 : false;
+
+    // Expose imperative API for parent components
     useImperativeHandle(ref, () => ({
       seekTo: (seconds: number) => {
         if (videoRef.current) {
@@ -122,9 +183,12 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         const hls = new Hls({
           enableWorker: true,
           lowLatencyMode: isLive,
-          backBufferLength: isLive ? 30 : 90,
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
+          backBufferLength: isLive ? 600 : 90, // Keep 10 mins of DVR buffer in memory!
+          maxBufferLength: isLive ? 60 : 30,
+          maxMaxBufferLength: 120,
+          liveDurationInfinity: isLive,
+          liveSyncDurationCount: 3,
+          liveMaxLatencyDurationCount: 15,
         });
 
         hls.loadSource(proxySrc);
@@ -138,6 +202,28 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           }));
           setQualityLevels(levels);
           setCurrentQuality(hls.currentLevel);
+
+          if (isLive) {
+            setLiveRange(getLiveRange());
+          }
+        });
+
+        // Multi-audio track discovery
+        hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_, data) => {
+          if (data.audioTracks && data.audioTracks.length > 0) {
+            setAudioTracks(
+              data.audioTracks.map((t, idx) => ({
+                id: idx,
+                name: t.name || t.lang || `Track ${idx + 1}`,
+                lang: t.lang,
+              }))
+            );
+            setCurrentAudioTrack(hls.audioTrack);
+          }
+        });
+
+        hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (_, data) => {
+          setCurrentAudioTrack(data.id);
         });
 
         hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
@@ -170,7 +256,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         // Native Safari HLS
         video.src = proxySrc;
       }
-    }, [proxySrc, isLive]);
+    }, [proxySrc, isLive, getLiveRange]);
 
     // Handle Controls Visibility on Mouse Activity
     const handleActivity = useCallback(() => {
@@ -178,7 +264,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
       controlsTimeoutRef.current = setTimeout(() => {
         if (isPlaying) setShowControls(false);
-      }, 2800);
+      }, 3000);
     }, [isPlaying]);
 
     useEffect(() => {
@@ -203,18 +289,59 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       setTimeout(() => setCenterPulse(null), 500);
     }, []);
 
-    // Seek Helper
-    const seekRelative = useCallback((deltaSeconds: number) => {
-      const video = videoRef.current;
-      if (!video) return;
+    // Seek Helper (Supports Live DVR time-shifting)
+    const seekRelative = useCallback(
+      (deltaSeconds: number) => {
+        const video = videoRef.current;
+        if (!video) return;
 
-      video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + deltaSeconds));
-      setSeekRipple(deltaSeconds > 0 ? "forward" : "backward");
-      if (seekRippleTimeoutRef.current) clearTimeout(seekRippleTimeoutRef.current);
-      seekRippleTimeoutRef.current = setTimeout(() => setSeekRipple(null), 600);
+        if (isLive) {
+          const range = getLiveRange();
+          const minTime = range.start;
+          const maxTime = range.end > 0 ? range.end - 0.5 : video.currentTime;
+          const target = Math.max(minTime, Math.min(maxTime, video.currentTime + deltaSeconds));
+          video.currentTime = target;
+          setCurrentTime(target);
+        } else {
+          video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + deltaSeconds));
+        }
+
+        setSeekRipple(deltaSeconds > 0 ? "forward" : "backward");
+        if (seekRippleTimeoutRef.current) clearTimeout(seekRippleTimeoutRef.current);
+        seekRippleTimeoutRef.current = setTimeout(() => setSeekRipple(null), 600);
+      },
+      [isLive, getLiveRange]
+    );
+
+    // Jump to real-time live edge
+    const jumpToLive = useCallback(() => {
+      const video = videoRef.current;
+      if (!video || !isLive) return;
+      const range = getLiveRange();
+      const target = hlsRef.current?.liveSyncPosition || (range.end > 1 ? range.end - 0.5 : video.duration);
+      if (target > 0) {
+        video.currentTime = target;
+        setCurrentTime(target);
+        video.play().catch(() => {});
+      }
+    }, [isLive, getLiveRange]);
+
+    // Reload stream / Reconnect
+    const reloadStream = useCallback(() => {
+      setIsReloading(true);
+      const video = videoRef.current;
+      if (hlsRef.current) {
+        hlsRef.current.stopLoad();
+        hlsRef.current.startLoad();
+        if (video) video.play().catch(() => {});
+      } else if (video) {
+        video.load();
+        video.play().catch(() => {});
+      }
+      setTimeout(() => setIsReloading(false), 900);
     }, []);
 
-    // Fullscreen Toggle (Standard + WebKit / iOS Safari Mobile)
+    // Fullscreen Toggle
     const toggleFullscreen = useCallback(() => {
       const container = containerRef.current as any;
       const video = videoRef.current as any;
@@ -240,7 +367,6 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           container.webkitRequestFullscreen();
           setIsFullscreen(true);
         } else if (video?.webkitEnterFullscreen) {
-          // iOS Safari iPhone fallback
           video.webkitEnterFullscreen();
           setIsFullscreen(true);
         } else if (video?.requestFullscreen) {
@@ -259,7 +385,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       }
     }, []);
 
-    // Sync fullscreen state with Esc key or native exit (including iOS Safari events)
+    // Sync fullscreen state
     useEffect(() => {
       const handleFullscreenChange = () => {
         const doc = document as any;
@@ -342,6 +468,13 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       setCurrentQuality(levelIndex);
     };
 
+    // Audio track selection
+    const handleAudioTrackChange = (trackIndex: number) => {
+      if (!hlsRef.current) return;
+      hlsRef.current.audioTrack = trackIndex;
+      setCurrentAudioTrack(trackIndex);
+    };
+
     // Playback rate selection
     const handleRateChange = (rate: number) => {
       const video = videoRef.current;
@@ -350,13 +483,23 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       setPlaybackRate(rate);
     };
 
-    // Progress Bar Scrubbing
+    // Scrubber Scrubbing (Supports Live DVR)
     const handleScrub = (e: React.MouseEvent<HTMLDivElement>) => {
       const video = videoRef.current;
+      if (!video) return;
       const rect = e.currentTarget.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      if (video && video.duration) {
+      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+
+      if (isLive) {
+        const range = getLiveRange();
+        if (range.window > 0) {
+          const targetTime = range.start + pos * range.window;
+          video.currentTime = targetTime;
+          setCurrentTime(targetTime);
+        }
+      } else if (video.duration) {
         video.currentTime = pos * video.duration;
+        setCurrentTime(video.currentTime);
       }
     };
 
@@ -364,15 +507,21 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       const rect = e.currentTarget.getBoundingClientRect();
       const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       setHoverPos(e.clientX - rect.left);
-      if (duration > 0) {
+
+      if (isLive) {
+        const range = getLiveRange();
+        const hoverTimeTarget = range.start + pos * range.window;
+        const hoverBehind = Math.max(0, range.end - hoverTimeTarget);
+        setLiveHoverBehind(hoverBehind);
+        setHoverTime(hoverTimeTarget);
+      } else if (duration > 0) {
         setHoverTime(pos * duration);
       }
     };
 
-    // Keyboard Shortcuts (Space, K, J, L, F, M, Arrows)
+    // Keyboard Shortcuts
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
-        // Ignore if user is typing in input or textarea
         const activeTag = (document.activeElement?.tagName || "").toLowerCase();
         if (activeTag === "input" || activeTag === "textarea") return;
 
@@ -387,10 +536,17 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
             e.preventDefault();
             seekRelative(-10);
             break;
-          case "l":
           case "arrowright":
             e.preventDefault();
             seekRelative(10);
+            break;
+          case "l":
+            e.preventDefault();
+            if (isLive) {
+              jumpToLive();
+            } else {
+              seekRelative(10);
+            }
             break;
           case "arrowup":
             e.preventDefault();
@@ -418,14 +574,47 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
             e.preventDefault();
             toggleFullscreen();
             break;
+          case "p":
+            e.preventDefault();
+            togglePip();
+            break;
+          case "r":
+            if (isLive) {
+              e.preventDefault();
+              reloadStream();
+            }
+            break;
+          case "[":
+            if (onPrevChannel) {
+              e.preventDefault();
+              onPrevChannel();
+            }
+            break;
+          case "]":
+            if (onNextChannel) {
+              e.preventDefault();
+              onNextChannel();
+            }
+            break;
         }
       };
 
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [togglePlay, seekRelative, toggleFullscreen, toggleMute]);
+    }, [
+      togglePlay,
+      seekRelative,
+      jumpToLive,
+      reloadStream,
+      toggleFullscreen,
+      toggleMute,
+      togglePip,
+      isLive,
+      onPrevChannel,
+      onNextChannel,
+    ]);
 
-    // Sync HTML5 Video Events
+    // Sync Video Events
     const handleTimeUpdate = () => {
       const video = videoRef.current;
       if (!video) return;
@@ -433,11 +622,28 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       if (video.buffered.length > 0) {
         setBufferedEnd(video.buffered.end(video.buffered.length - 1));
       }
+      if (isLive) {
+        setLiveRange(getLiveRange());
+      }
       onTimeUpdate?.();
     };
 
-    const playedPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-    const bufferedPercent = duration > 0 ? (bufferedEnd / duration) * 100 : 0;
+    // Calculate percentage played and buffered
+    const playedPercent = isLive
+      ? liveRange.window > 0
+        ? Math.max(0, Math.min(100, ((currentTime - liveRange.start) / liveRange.window) * 100))
+        : 100
+      : duration > 0
+      ? (currentTime / duration) * 100
+      : 0;
+
+    const bufferedPercent = isLive
+      ? liveRange.window > 0
+        ? Math.max(0, Math.min(100, ((bufferedEnd - liveRange.start) / liveRange.window) * 100))
+        : 100
+      : duration > 0
+      ? (bufferedEnd / duration) * 100
+      : 0;
 
     return (
       <div
@@ -459,7 +665,10 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           onPause={() => setIsPlaying(false)}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={() => {
-            if (videoRef.current) setDuration(videoRef.current.duration);
+            if (videoRef.current) {
+              setDuration(videoRef.current.duration);
+              if (isLive) setLiveRange(getLiveRange());
+            }
           }}
           className="w-full h-full object-contain cursor-pointer"
         />
@@ -477,7 +686,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           </div>
         )}
 
-        {/* Double-tap Seek Animations */}
+        {/* Seek Animations Feedback */}
         {seekRipple && (
           <div
             className={clsx(
@@ -501,118 +710,210 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           </div>
         )}
 
-        {/* Floating Top Bar (Live Badge / Status) */}
+        {/* Floating Top Bar (Channel Brand, Live Badge, and Reload) */}
         <div
           className={clsx(
-            "absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-30 transition-opacity duration-300 pointer-events-none",
+            "absolute top-0 left-0 right-0 p-3 sm:p-4 flex items-center justify-between z-30 transition-opacity duration-300 pointer-events-none",
             showControls ? "opacity-100" : "opacity-0"
           )}
         >
-          {isLive && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/90 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/20 backdrop-blur-md">
-              <Radio className="w-3.5 h-3.5 animate-pulse" />
-              <span>LIVE</span>
-            </div>
-          )}
+          {/* Top Left: Channel Quick Info */}
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {channelNumber && (
+              <span className="font-mono bg-red-600/90 text-white px-2 py-0.5 rounded-lg text-xs font-black shadow-md">
+                CH {channelNumber}
+              </span>
+            )}
+            {channelName && (
+              <span className="text-xs sm:text-sm font-bold text-white drop-shadow-md flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-white/10">
+                <span>{countryFlag}</span>
+                <span>{channelName}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Top Right: Status Badge & Reload Stream button */}
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {isLive && (
+              <button
+                onClick={jumpToLive}
+                className={clsx(
+                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer backdrop-blur-md border",
+                  isAtLiveEdge
+                    ? "bg-red-600/90 text-white border-red-500/30 shadow-lg shadow-red-600/20"
+                    : "bg-zinc-800/90 hover:bg-zinc-700 text-white border-white/20"
+                )}
+                title={isAtLiveEdge ? "Watching Live" : "Behind Live — Click to Go Live (L)"}
+              >
+                <Radio className={clsx("w-3.5 h-3.5", isAtLiveEdge && "animate-pulse")} />
+                <span>{isAtLiveEdge ? "LIVE" : `-${formatTime(Math.round(behindSeconds))}`}</span>
+              </button>
+            )}
+
+            {isLive && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={reloadStream}
+                className="h-7 w-7 text-white/90 hover:text-white bg-black/40 hover:bg-black/60 rounded-full border border-white/10 backdrop-blur-md cursor-pointer"
+                title="Reload Live Stream (r)"
+              >
+                <RefreshCw className={clsx("w-3.5 h-3.5", isReloading && "animate-spin")} />
+              </Button>
+            )}
+          </div>
         </div>
+
+        {/* Browser Autoplay Muted Notification Prompt */}
+        {isLive && isMuted && isPlaying && (
+          <button
+            onClick={toggleMute}
+            className="absolute top-14 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/85 hover:bg-black text-white text-xs font-semibold border border-white/20 shadow-xl backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+          >
+            <VolumeX className="w-4 h-4 text-amber-400 animate-pulse" />
+            <span>Audio is muted — Click to Unmute</span>
+          </button>
+        )}
 
         {/* Bottom Floating Control Bar */}
         <div
           className={clsx(
-            "absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/95 via-black/60 to-transparent z-30 transition-all duration-300 space-y-2",
+            "absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/95 via-black/70 to-transparent z-30 transition-all duration-300 space-y-2",
             showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
           )}
         >
-          {/* Custom Precision Scrubber Bar (Only for non-live VOD) */}
-          {!isLive && (
-            <div
-              onClick={handleScrub}
-              onMouseMove={handleScrubHover}
-              onMouseLeave={() => setHoverTime(null)}
-              className="relative w-full py-2 -my-2 cursor-pointer group/scrub"
-            >
-              <div className="relative w-full h-1.5 group-hover/scrub:h-2.5 bg-white/25 rounded-full transition-all duration-150 overflow-hidden">
-                {/* Buffer Bar */}
-                <div
-                  style={{ width: `${bufferedPercent}%` }}
-                  className="absolute top-0 left-0 bottom-0 bg-white/40 rounded-full transition-all duration-200"
-                />
-                {/* Played Bar */}
-                <div
-                  style={{ width: `${playedPercent}%` }}
-                  className="absolute top-0 left-0 bottom-0 bg-red-600 rounded-full"
-                />
-              </div>
-              {/* Scrubber Thumb */}
+          {/* Precision Scrubber Bar (Supports both VOD & Live DVR time-shifting) */}
+          <div
+            onClick={handleScrub}
+            onMouseMove={handleScrubHover}
+            onMouseLeave={() => {
+              setHoverTime(null);
+              setLiveHoverBehind(null);
+            }}
+            className="relative w-full py-2 -my-2 cursor-pointer group/scrub"
+          >
+            <div className="relative w-full h-1.5 group-hover/scrub:h-2.5 bg-white/25 rounded-full transition-all duration-150 overflow-hidden">
+              {/* Buffer Bar */}
               <div
-                style={{ left: `${playedPercent}%` }}
-                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-red-600 shadow-md scale-0 group-hover/scrub:scale-100 transition-transform pointer-events-none"
+                style={{ width: `${bufferedPercent}%` }}
+                className="absolute top-0 left-0 bottom-0 bg-white/40 rounded-full transition-all duration-200"
               />
-              {/* Hover Time Tooltip */}
-              {hoverTime !== null && (
-                <div
-                  style={{ left: `${hoverPos}px` }}
-                  className="absolute -top-7 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-black/90 text-white border border-white/25 shadow-lg pointer-events-none"
-                >
-                  {formatTime(hoverTime)}
-                </div>
-              )}
+              {/* Played Bar */}
+              <div
+                style={{ width: `${playedPercent}%` }}
+                className={clsx(
+                  "absolute top-0 left-0 bottom-0 rounded-full transition-all duration-75",
+                  isLive && isAtLiveEdge ? "bg-red-500" : "bg-red-600"
+                )}
+              />
             </div>
-          )}
+            {/* Scrubber Thumb */}
+            <div
+              style={{ left: `${playedPercent}%` }}
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-red-600 shadow-md scale-0 group-hover/scrub:scale-100 transition-transform pointer-events-none"
+            />
+            {/* Hover Tooltip (DVR Relative or VOD timestamp) */}
+            {hoverTime !== null && (
+              <div
+                style={{ left: `${hoverPos}px` }}
+                className="absolute -top-7 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-black/95 text-white border border-white/25 shadow-lg pointer-events-none whitespace-nowrap"
+              >
+                {isLive ? (
+                  liveHoverBehind !== null && liveHoverBehind <= 5 ? (
+                    <span className="text-red-400 font-bold">🔴 LIVE</span>
+                  ) : (
+                    `-${formatTime(Math.round(liveHoverBehind || 0))}`
+                  )
+                ) : (
+                  formatTime(hoverTime)
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Control Buttons Row */}
           <div className="flex items-center justify-between text-white select-none gap-1 sm:gap-2 overflow-x-hidden">
-            {/* Left Controls: Play/Pause, Seek, Volume, Time */}
-            <div className="flex items-center gap-1 sm:gap-2 min-w-0 shrink">
+            {/* Left Controls: Channel Switch, Play/Pause, Rewind/Forward, Volume, Live Badge */}
+            <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 shrink">
+              {/* Previous Channel (when available) */}
+              {onPrevChannel && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onPrevChannel}
+                  className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full transition-transform active:scale-90 shrink-0 cursor-pointer"
+                  title="Previous Channel ([)"
+                >
+                  <SkipBack className="w-4 h-4" />
+                </Button>
+              )}
+
+              {/* Play / Pause Toggle */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={togglePlay}
-                className="h-8 w-8 sm:h-9 sm:w-9 text-white hover:text-white hover:bg-white/15 rounded-full transition-transform active:scale-90 shrink-0"
+                className="h-8 w-8 sm:h-9 sm:w-9 text-white hover:text-white hover:bg-white/15 rounded-full transition-transform active:scale-90 shrink-0 cursor-pointer"
                 title={isPlaying ? "Pause (k / space)" : "Play (k / space)"}
               >
-                {isPlaying ? <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-current" /> : <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />}
+                {isPlaying ? (
+                  <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                ) : (
+                  <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
+                )}
               </Button>
 
-              {!isLive && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => seekRelative(-10)}
-                    className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full hidden sm:inline-flex shrink-0"
-                    title="Rewind 10s (j / left arrow)"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => seekRelative(10)}
-                    className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full hidden sm:inline-flex shrink-0"
-                    title="Forward 10s (l / right arrow)"
-                  >
-                    <RotateCw className="w-4 h-4" />
-                  </Button>
-                </>
+              {/* Next Channel (when available) */}
+              {onNextChannel && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onNextChannel}
+                  className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full transition-transform active:scale-90 shrink-0 cursor-pointer"
+                  title="Next Channel (])"
+                >
+                  <SkipForward className="w-4 h-4" />
+                </Button>
               )}
 
-              {/* Volume Slider Group - Icon only on mobile, sleek slider on desktop */}
-              <div className="flex items-center gap-1 sm:gap-1.5 bg-black/40 backdrop-blur-xs px-1.5 sm:px-2 py-1 rounded-full border border-white/15 shrink-0">
+              {/* Rewind -10s (Enabled for both Live DVR & VOD) */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => seekRelative(-10)}
+                className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full inline-flex shrink-0 cursor-pointer"
+                title="Rewind 10s (j / left arrow)"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+
+              {/* Forward +10s (Enabled for both Live DVR & VOD) */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => seekRelative(10)}
+                disabled={isLive && isAtLiveEdge}
+                className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full inline-flex shrink-0 cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+                title="Forward 10s (right arrow)"
+              >
+                <RotateCw className="w-4 h-4" />
+              </Button>
+
+              {/* Volume Slider Group */}
+              <div className="flex items-center gap-1 group/vol shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={toggleMute}
-                  className="h-7 w-7 text-white/90 hover:text-white hover:bg-white/15 rounded-full p-0"
+                  className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full transition-transform active:scale-90 shrink-0 cursor-pointer"
                   title={isMuted ? "Unmute (m)" : "Mute (m)"}
-                  aria-label={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted || volume === 0 ? (
                     <VolumeX className="w-4 h-4 text-red-400" />
                   ) : volume < 0.5 ? (
-                    <Volume1 className="w-4 h-4 text-white" />
+                    <Volume1 className="w-4 h-4" />
                   ) : (
-                    <Volume2 className="w-4 h-4 text-white" />
+                    <Volume2 className="w-4 h-4" />
                   )}
                 </Button>
                 <input
@@ -623,7 +924,9 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                   value={isMuted ? 0 : volume}
                   onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
                   style={{
-                    background: `linear-gradient(to right, #ef4444 ${isMuted ? 0 : Math.round(volume * 100)}%, rgba(255,255,255,0.25) ${isMuted ? 0 : Math.round(volume * 100)}%)`,
+                    background: `linear-gradient(to right, #ef4444 ${
+                      isMuted ? 0 : Math.round(volume * 100)
+                    }%, rgba(255,255,255,0.25) ${isMuted ? 0 : Math.round(volume * 100)}%)`,
                   }}
                   className="hidden sm:inline-block w-14 sm:w-20 hover:w-24 transition-all duration-200 h-1.5 rounded-full accent-red-500 cursor-pointer shadow-xs focus:outline-none"
                   title={`Volume: ${isMuted ? 0 : Math.round(volume * 100)}% (Up/Down arrow)`}
@@ -631,14 +934,32 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                 />
               </div>
 
-              {/* Time Display */}
+              {/* Time Display & DVR Live Status Button */}
               <div className="text-[11px] sm:text-xs font-mono text-white/90 shrink-0">
                 {isLive ? (
-                  <span className="flex items-center gap-1 sm:gap-1.5 text-red-500 font-bold bg-red-500/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-red-500/20 whitespace-nowrap">
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
-                    <span>LIVE</span>
-                    <span className="hidden sm:inline"> STREAM</span>
-                  </span>
+                  <button
+                    onClick={jumpToLive}
+                    className={clsx(
+                      "flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border transition-all cursor-pointer whitespace-nowrap",
+                      isAtLiveEdge
+                        ? "text-red-500 font-bold bg-red-500/10 border-red-500/20"
+                        : "text-zinc-200 bg-zinc-800/90 hover:bg-zinc-700/90 border-white/20"
+                    )}
+                    title={isAtLiveEdge ? "You are watching live" : "Click to jump to live edge (L)"}
+                  >
+                    <span
+                      className={clsx(
+                        "w-2 h-2 rounded-full",
+                        isAtLiveEdge ? "bg-red-500 animate-pulse" : "bg-zinc-400"
+                      )}
+                    />
+                    <span>{isAtLiveEdge ? "LIVE" : `-${formatTime(Math.round(behindSeconds))}`}</span>
+                    {!isAtLiveEdge && (
+                      <span className="text-[10px] text-red-400 font-bold uppercase hidden sm:inline">
+                        • GO LIVE
+                      </span>
+                    )}
+                  </button>
                 ) : (
                   <span className="px-1.5 py-0.5 rounded bg-black/40 whitespace-nowrap">
                     {formatTime(currentTime)} / {formatTime(duration)}
@@ -647,16 +968,51 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
               </div>
             </div>
 
-            {/* Right Controls: Quality, Speed, PiP, Fullscreen */}
+            {/* Right Controls: Audio Tracks, Quality, Speed, PiP, Fullscreen */}
             <div className="flex items-center gap-1 shrink-0">
-              {/* Quality Selector Menu */}
+              {/* Multi-language Audio Track Menu (when broadcast contains multiple audio streams) */}
+              {audioTracks.length > 1 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-1.5 sm:px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1 shrink-0 cursor-pointer"
+                      title="Audio Language"
+                    >
+                      <Languages className="w-3.5 h-3.5 text-primary" />
+                      <span className="hidden md:inline">Audio</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    container={containerRef.current}
+                    align="end"
+                    className="w-40 bg-zinc-900/95 border-zinc-800 text-white text-xs z-[9999]"
+                  >
+                    <DropdownMenuLabel className="text-[11px] text-zinc-400">Audio Track</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-zinc-800" />
+                    {audioTracks.map((track) => (
+                      <DropdownMenuItem
+                        key={track.id}
+                        onClick={() => handleAudioTrackChange(track.id)}
+                        className="justify-between cursor-pointer focus:bg-zinc-800"
+                      >
+                        <span>{track.name}</span>
+                        {currentAudioTrack === track.id && <Check className="w-3.5 h-3.5 text-primary" />}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {/* Stream Quality Selector Menu */}
               {qualityLevels.length > 0 && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-1.5 sm:px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1 shrink-0"
+                      className="h-8 px-1.5 sm:px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1 shrink-0 cursor-pointer"
                       title="Quality"
                     >
                       <Sliders className="w-3.5 h-3.5" />
@@ -693,14 +1049,14 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                 </DropdownMenu>
               )}
 
-              {/* Playback Speed Menu (non-live) */}
-              {!isLive && (
+              {/* Playback Speed Menu (Available for VOD and Live DVR mode) */}
+              {(!isLive || !isAtLiveEdge) && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-1.5 sm:px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1 shrink-0"
+                      className="h-8 px-1.5 sm:px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1 shrink-0 cursor-pointer"
                       title="Playback Speed"
                     >
                       <Settings className="w-3.5 h-3.5" />
@@ -712,7 +1068,9 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                     align="end"
                     className="w-32 bg-zinc-900/95 border-zinc-800 text-white text-xs z-[9999]"
                   >
-                    <DropdownMenuLabel className="text-[11px] text-zinc-400">Playback Speed</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-[11px] text-zinc-400">
+                      {isLive ? "Catch-up Speed" : "Playback Speed"}
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-zinc-800" />
                     {PLAYBACK_RATES.map((rate) => (
                       <DropdownMenuItem
@@ -733,18 +1091,18 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                 variant="ghost"
                 size="icon"
                 onClick={togglePip}
-                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full hidden sm:inline-flex shrink-0"
-                title="Picture in Picture"
+                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full hidden sm:inline-flex shrink-0 cursor-pointer"
+                title="Picture in Picture (p)"
               >
                 <PictureInPicture2 className="w-4 h-4" />
               </Button>
 
-              {/* Fullscreen */}
+              {/* Fullscreen Toggle */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleFullscreen}
-                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full shrink-0 flex items-center justify-center p-0"
+                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full shrink-0 flex items-center justify-center p-0 cursor-pointer"
                 title={isFullscreen ? "Exit Fullscreen (f)" : "Fullscreen (f)"}
               >
                 {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}

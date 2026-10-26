@@ -5,15 +5,21 @@ import { VideoPlayer } from "@/components/player/VideoPlayer";
 import { LiveChannel } from "@/constants/liveChannels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Share2, Check, ChevronDown } from "lucide-react";
+import { Share2, Check, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import clsx from "clsx";
 
 interface LiveTvPlayerProps {
   channel: LiveChannel;
+  onPrevChannel?: () => void;
+  onNextChannel?: () => void;
 }
 
-export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
+export function LiveTvPlayer({
+  channel,
+  onPrevChannel,
+  onNextChannel,
+}: LiveTvPlayerProps) {
   const playerRef = useRef<any>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
@@ -49,7 +55,7 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
 
   return (
     <div className="space-y-4">
-      {/* 16:9 Class-Leading Live Player */}
+      {/* 16:9 Class-Leading Live Player with DVR Time-Shifting */}
       <div className="relative rounded-2xl overflow-hidden bg-black aspect-video ring-1 ring-border/50 shadow-2xl shadow-black/40 group">
         <VideoPlayer
           key={channel.id}
@@ -57,12 +63,17 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
           src={channel.streamUrl}
           poster={channel.logo}
           isLive={true}
+          onPrevChannel={onPrevChannel}
+          onNextChannel={onNextChannel}
+          channelName={channel.name}
+          channelNumber={channel.channelNumber}
+          countryFlag={channel.countryFlag}
         />
       </div>
 
       {/* Channel Metadata Card */}
       <div className="p-3.5 sm:p-4 rounded-xl bg-card/75 border border-border/40 backdrop-blur-sm shadow-sm space-y-2 sm:space-y-2.5">
-        {/* Row 1: Channel Title, Hindi/Local Name, and Share Action on same row */}
+        {/* Row 1: Channel Title, Hindi/Local Name, Surfing Buttons and Share Action */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-center gap-2 flex-wrap">
@@ -80,32 +91,61 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
             </div>
           </div>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleShare}
-            className="gap-1.5 text-xs h-7 sm:h-8 px-2.5 sm:px-3 rounded-full bg-muted/40 hover:bg-muted border-border/50 shrink-0 cursor-pointer"
-            title="Share Live TV Channel"
-          >
-            {isCopied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Copied</span>
-              </>
-            ) : (
-              <>
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share</span>
-              </>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Quick Channel Surfing buttons */}
+            {onPrevChannel && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onPrevChannel}
+                className="h-7 sm:h-8 px-2 rounded-full bg-muted/40 hover:bg-muted border-border/50 text-xs gap-1 cursor-pointer"
+                title="Previous Channel ([)"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Prev</span>
+              </Button>
             )}
-          </Button>
+
+            {onNextChannel && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onNextChannel}
+                className="h-7 sm:h-8 px-2 rounded-full bg-muted/40 hover:bg-muted border-border/50 text-xs gap-1 cursor-pointer"
+                title="Next Channel (])"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Button>
+            )}
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleShare}
+              className="gap-1.5 text-xs h-7 sm:h-8 px-2.5 sm:px-3 rounded-full bg-muted/40 hover:bg-muted border-border/50 shrink-0 cursor-pointer"
+              title="Share Live TV Channel"
+            >
+              {isCopied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Share</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Row 2: Badges row in a clean horizontal strip */}
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-xs">
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block" />
-            Live 24x7
+            Live DVR
           </span>
           <Badge
             variant="outline"

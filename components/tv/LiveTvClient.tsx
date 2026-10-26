@@ -41,6 +41,16 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
     router.replace(`/tv?channel=${channel.id}`, { scroll: false });
   };
 
+  const currentIndex = ALL_LIVE_CHANNELS.findIndex((c) => c.id === activeChannel.id);
+  const handlePrevChannel = () => {
+    const prevIdx = (currentIndex - 1 + ALL_LIVE_CHANNELS.length) % ALL_LIVE_CHANNELS.length;
+    handleSelectChannel(ALL_LIVE_CHANNELS[prevIdx]);
+  };
+  const handleNextChannel = () => {
+    const nextIdx = (currentIndex + 1) % ALL_LIVE_CHANNELS.length;
+    handleSelectChannel(ALL_LIVE_CHANNELS[nextIdx]);
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8">
       {/* Sleek Global FTA Hero Banner */}
@@ -81,7 +91,11 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         {/* Left Column: Active Player (Col 7 on desktop) */}
         <div className="lg:col-span-7 space-y-4">
-          <LiveTvPlayer channel={activeChannel} />
+          <LiveTvPlayer
+            channel={activeChannel}
+            onPrevChannel={handlePrevChannel}
+            onNextChannel={handleNextChannel}
+          />
 
           {/* Mobile Quick-Dial Carousel (Visible only on mobile/tablet) */}
           <div className="block lg:hidden space-y-2 pt-1">
