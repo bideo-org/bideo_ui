@@ -25,11 +25,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 import { useAuth } from "@/store/auth-context";
+import { useLanguage } from "@/store/language-context";
+import { LanguageSwitcher } from "@/components/partials/LanguageSwitcher";
 
 export function Navbar() {
   const pathname = usePathname();
   const { setTheme } = useTheme();
   const { isAuthenticated, isLoaded = true, logout, user } = useAuth();
+  const { t } = useLanguage();
 
   if (pathname?.startsWith("/embed")) {
     return null;
@@ -70,7 +73,7 @@ export function Navbar() {
                     href="/"
                     className="text-sm font-medium px-3.5 py-2 hover:underline"
                   >
-                    Home
+                    {t("nav.home")}
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -80,7 +83,7 @@ export function Navbar() {
                     href="/reels"
                     className="text-sm font-medium px-3.5 py-2 hover:underline flex items-center gap-1.5"
                   >
-                    <span>Reels</span>
+                    <span>{t("nav.reels")}</span>
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -90,7 +93,7 @@ export function Navbar() {
                   className="text-sm font-medium px-3.5 py-2 hover:underline !inline-flex !flex-row items-center gap-1.5 whitespace-nowrap"
                 >
                   <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                    Live TV
+                    {t("nav.liveTv")}
                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0 ring-2 ring-red-500/20" />
                   </span>
                 </Link>
@@ -101,7 +104,7 @@ export function Navbar() {
                     href="/trending"
                     className="text-sm font-medium px-3.5 py-2 hover:underline flex items-center gap-1.5"
                   >
-                    Trending
+                    {t("nav.trending")}
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -117,7 +120,7 @@ export function Navbar() {
               <div className="w-18 h-9 rounded-md bg-muted/30 animate-pulse" />
             ) : !isAuthenticated ? (
               <Link href="/auth/login">
-                <Button variant="outline">Sign In</Button>
+                <Button variant="outline">{t("nav.signIn")}</Button>
               </Link>
             ) : (
               <DropdownMenu>
@@ -137,31 +140,34 @@ export function Navbar() {
                 <DropdownMenuContent align="end">
                   {user?.username && (
                     <DropdownMenuItem asChild>
-                      <Link href={`/channel/@${user.username}`}>Your Channel</Link>
+                      <Link href={`/channel/@${user.username}`}>{t("nav.yourChannel")}</Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem asChild>
-                    <Link href="/video/upload">Upload Video</Link>
+                    <Link href="/video/upload">{t("nav.upload")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/history">Watch History</Link>
+                    <Link href="/history">{t("nav.watchHistory")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/playlists">Playlists & Saved</Link>
+                    <Link href="/playlists">{t("nav.playlists")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/my-videos">My Videos</Link>
+                    <Link href="/my-videos">{t("nav.myVideos")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
+                    <Link href="/profile">{t("nav.profile")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={logout} className="text-red-500">
-                    Log Out
+                    {t("nav.logOut")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
           </div>
+
+          {/* Language Switcher */}
+          <LanguageSwitcher variant="icon" />
 
           {/* Theme Toggle */}
           <DropdownMenu>
@@ -173,13 +179,13 @@ export function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setTheme("light")}>
-                Light
+                {t("nav.light")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme("dark")}>
-                Dark
+                {t("nav.dark")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme("system")}>
-                System
+                {t("nav.system")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

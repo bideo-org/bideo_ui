@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Github, Linkedin, GitCommit } from "lucide-react";
+import { LanguageSwitcher } from "@/components/partials/LanguageSwitcher";
 
 const creators = [
   {
@@ -343,26 +344,30 @@ export function Footer() {
         <div className="border-t border-border/40 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground text-center sm:text-left">
           <p suppressHydrationWarning>© {new Date().getFullYear()} BuzzClips | MIT License • 🇮🇳 Proudly Built in India</p>
 
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground border border-border/50 transition-colors">
-            <span className="text-[11px] font-medium text-muted-foreground/80">
-              build:
-            </span>
-            <Link
-              href={commitUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-[11px] font-semibold text-foreground/80 hover:text-primary transition-colors flex items-center gap-1"
-              title={
-                buildNumber
-                  ? `Build #${buildNumber} (${commitSha})`
-                  : `Commit ${commitSha}`
-              }
-            >
-              <GitCommit className="w-3 h-3 text-muted-foreground" />
-              <span>
-                {buildNumber ? `#${buildNumber} • ${shortSha}` : shortSha}
+          <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-end">
+            <LanguageSwitcher variant="full" />
+
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground border border-border/50 transition-colors">
+              <span className="text-[11px] font-medium text-muted-foreground/80">
+                build:
               </span>
-            </Link>
+              <Link
+                href={commitUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-[11px] font-semibold text-foreground/80 hover:text-primary transition-colors flex items-center gap-1"
+                title={
+                  buildNumber
+                    ? `Build #${buildNumber} (${commitSha})`
+                    : `Commit ${commitSha}`
+                }
+              >
+                <GitCommit className="w-3 h-3 text-muted-foreground" />
+                <span>
+                  {buildNumber ? `#${buildNumber} • ${shortSha}` : shortSha}
+                </span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

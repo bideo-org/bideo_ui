@@ -1,0 +1,128 @@
+import React from "react";
+import { render, screen, fireEvent, renderHook, act } from "@testing-library/react";
+import {
+  LanguageProvider,
+  useLanguage,
+} from "@/store/language-context";
+import { LanguageSwitcher } from "@/components/partials/LanguageSwitcher";
+import { SUPPORTED_LANGUAGES, isValidLocale } from "@/constants/locales";
+import { getTranslation } from "@/constants/translations";
+
+function TestConsumer() {
+  const { locale, setLocale, t, formatNumber, formatDate, isRTL } =
+    useLanguage();
+
+  return (
+    <div>
+      <span data-testid="locale">{locale}</span>
+      <span data-testid="home-text">{t("nav.home")}</span>
+      <span data-testid="formatted-number">{formatNumber(12345)}</span>
+      <span data-testid="formatted-date">
+        {formatDate(new Date("2026-01-15T00:00:00Z"))}
+      </span>
+      <span data-testid="is-rtl">{String(isRTL)}</span>
+      <button onClick={() => setLocale("hi")}>Switch to Hindi</button>
+      <button onClick={() => setLocale("ar")}>Switch to Arabic</button>
+      <button onClick={() => setLocale("en")}>Switch to English</button>
+    </div>
+  );
+}
+
+describe("Language Context & Switcher", () => {
+  beforeEach(() => {
+    try {
+      localStorage.clear();
+      document.cookie = "buzzclips_locale=en; path=/";
+    } catch {}
+  });
+
+  it("provides default english translations and helpers", () => {
+    render(
+      <LanguageProvider>
+        <TestConsumer />
+      </LanguageProvider>
+    );
+
+    expect(screen.getByTestId("locale").textContent).toBe("en");
+    expect(screen.getByTestId("home-text").textContent).toBe("Home");
+    expect(screen.getByTestId("is-rtl").textContent).toBe("false");
+    expect(screen.getByTestId("formatted-number").textContent).toContain("12");
+  });
+
+  it("updates locale to Hindi and Arabic when setLocale is called", () => {
+    render(
+      <LanguageProvider>
+        <TestConsumer />
+      </LanguageProvider>
+    );
+
+    fireEvent.click(screen.getByText("Switch to Hindi"));
+    expect(screen.getByTestId("locale").textContent).toBe("hi");
+    expect(screen.getByTestId("home-text").textContent).toBe("होम");
+
+    fireEvent.click(screen.getByText("Switch to Arabic"));
+    expect(screen.getByTestId("locale").textContent).toBe("ar");
+    expect(screen.getByTestId("home-text").textContent).toBe("الرئيسية");
+    expect(screen.getByTestId("is-rtl").textContent).toBe("true");
+
+    // Reset back to English
+    fireEvent.click(screen.getByText("Switch to English"));
+    expect(screen.getByTestId("locale").textContent).toBe("en");
+  });
+
+  it("renders LanguageSwitcher dropdown trigger and label", () => {
+    render(
+      <LanguageProvider>
+        <LanguageSwitcher variant="full" />
+      </LanguageProvider>
+    );
+
+    const trigger = screen.getByRole("button");
+    expect(trigger).toBeInTheDocument();
+    expect(screen.getByText("English")).toBeInTheDocument();
+  });
+
+  it("renders LanguageSwitcher icon variant", () => {
+    render(
+      <LanguageProvider>
+        <LanguageSwitcher variant="icon" />
+      </LanguageProvider>
+    );
+
+    const trigger = screen.getByRole("button");
+    expect(trigger).toBeInTheDocument();
+  });
+
+  it("validates locale codes correctly", () => {
+    expect(isValidLocale("en")).toBe(true);
+    expect(isValidLocale("hi")).toBe(true);
+    expect(isValidLocale("es")).toBe(true);
+    expect(isValidLocale("xyz")).toBe(false);
+  });
+
+  it("getTranslation falls back to English when a key is missing", () => {
+    expect(getTranslation("en", "nav.home")).toBe("Home");
+    expect(getTranslation("hi", "nav.home")).toBe("होम");
+    expect(getTranslation("hi", "nonexistent.key")).toBe("nonexistent.key");
+  });
+
+  it("getTranslation interpolates parameters correctly", () => {
+    expect(
+      getTranslation("en", "playlists.count_one", { count: 1 })
+    ).toBe("playlist created");
+  });
+
+  it("formats dates and numbers gracefully", () => {
+    const { result } = renderHook(() => useLanguage(), {
+      wrapper: ({ children }) => <LanguageProvider>{children}</LanguageProvider>,
+    });
+
+    expect(result.current.formatNumber(100)).toBeDefined();
+    expect(result.current.formatDate(new Date())).toBeDefined();
+    expect(result.current.formatDate("invalid-date")).toBeDefined();
+  });
+
+  it("contains all 12 supported languages", () => {
+    expect(SUPPORTED_LANGUAGES.length).toBe(12);
+  });
+});
