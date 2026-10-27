@@ -14,13 +14,17 @@ interface ReelsContainerProps {
 export function ReelsContainer({ initialVideos }: ReelsContainerProps) {
   const [videos] = useState<VideoDTO[]>(initialVideos);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(() => {
-    if (typeof window !== "undefined") {
+  const [isMuted, setIsMuted] = useState(true);
+
+  // Sync mute state from localStorage after mount to avoid SSR hydration mismatch
+  useEffect(() => {
+    try {
       const saved = localStorage.getItem("buzzclips_reels_muted");
-      return saved !== null ? saved === "true" : true;
-    }
-    return true;
-  });
+      if (saved !== null) {
+        setIsMuted(saved === "true");
+      }
+    } catch {}
+  }, []);
 
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => {

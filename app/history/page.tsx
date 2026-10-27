@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -161,8 +162,17 @@ export default function WatchHistoryPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="space-y-4 pt-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex flex-col sm:flex-row gap-4 p-3 rounded-2xl border border-border/40 bg-card/30">
+                <Skeleton className="w-full sm:w-60 aspect-video rounded-xl shrink-0" />
+                <div className="space-y-2.5 flex-1 py-1">
+                  <Skeleton className="h-5 w-3/4 rounded-md" />
+                  <Skeleton className="h-4 w-1/3 rounded-md" />
+                  <Skeleton className="h-3 w-1/4 rounded-md" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : historyItems.length === 0 ? (
           <Card className="p-12 text-center space-y-4 border-dashed border-border/60">

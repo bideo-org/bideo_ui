@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -178,8 +179,14 @@ export default function PlaylistsPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border/40 p-4 space-y-3 bg-card/40">
+                <Skeleton className="w-full aspect-video rounded-xl" />
+                <Skeleton className="h-5 w-3/4 rounded-md" />
+                <Skeleton className="h-4 w-1/2 rounded-md" />
+              </div>
+            ))}
           </div>
         ) : playlists.length === 0 ? (
           <Card className="p-12 text-center space-y-4 border-dashed border-border/60">

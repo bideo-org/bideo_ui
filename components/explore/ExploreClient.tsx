@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { MESSAGES } from "@/constants/messages";
 import { Search, X, Film, Tag } from "lucide-react";
 import { VideoDTO, PaginatedVideoResponse } from "@/types/video";
+import { motion } from "framer-motion";
 
 export const CATEGORIES: { label: string; value: string; slug: string; icon?: string }[] = [
   { label: "All", value: "ALL", slug: "", icon: "🔥" },
@@ -257,19 +258,29 @@ export default function ExploreClient({
           {CATEGORIES.map((cat) => {
             const isSelected = activeCategory === cat.value;
             return (
-              <button
+              <motion.button
                 key={cat.value}
                 onClick={() => handleCategorySelect(cat.value)}
                 aria-label={cat.label}
-                className={`flex items-center gap-1.5 whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 shrink-0 ${
+                whileTap={{ scale: 0.95 }}
+                className={`relative flex items-center gap-1.5 whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-colors duration-150 shrink-0 ${
                   isSelected
-                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25 scale-[1.02]"
+                    ? "text-primary-foreground"
                     : "bg-card/70 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50"
                 }`}
               >
-                {cat.icon && <span aria-hidden="true">{cat.icon}</span>}
-                <span>{cat.label}</span>
-              </button>
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeCategoryPill"
+                    className="absolute inset-0 rounded-full bg-primary shadow-sm shadow-primary/25 -z-0"
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {cat.icon && <span aria-hidden="true">{cat.icon}</span>}
+                  <span>{cat.label}</span>
+                </span>
+              </motion.button>
             );
           })}
         </div>
@@ -339,7 +350,13 @@ export default function ExploreClient({
         )}
 
         {/* Video Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <motion.div
+          key={`${activeCategory}-${activeTag}-${activeQuery}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        >
           {isLoading && videoList.length === 0
             ? Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="space-y-3">
@@ -370,7 +387,7 @@ export default function ExploreClient({
                 </div>
               </div>
             ))}
-        </div>
+        </motion.div>
 
         {/* Empty Search Results */}
         {!isLoading && videoList.length === 0 && (

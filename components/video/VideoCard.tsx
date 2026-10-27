@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Share2, Play, Eye, Clock, Flame } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
+import { motion } from "framer-motion";
 
 import { VideoDTO } from "@/types/video";
 
@@ -80,8 +81,10 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
   const duration = video.video_duration || "0:00";
 
   return (
-    <div
+    <motion.div
       className="group w-full max-w-full sm:max-w-sm flex flex-col transition-transform duration-200"
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.18, ease: "easeOut" }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -95,7 +98,7 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             muted
             playsInline
-            preload="metadata"
+            preload="none"
             poster={video.thumbnail_url}
             loop
           />
@@ -177,7 +180,7 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
             )}
           </Link>
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs mt-0.5">
-            <span className="flex items-center gap-1 font-medium">
+            <span suppressHydrationWarning className="flex items-center gap-1 font-medium">
               <Eye className="w-3 h-3" />
               {formattedViews} views
             </span>
@@ -186,6 +189,6 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -370,7 +370,7 @@ export default function MyVideos() {
                     );
                     const formattedDate = new Date(
                       video.video_uploadDate
-                    ).toLocaleDateString(undefined, {
+                    ).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",

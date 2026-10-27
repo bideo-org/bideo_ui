@@ -183,7 +183,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
       ? `${(video.video_views / 100000).toFixed(1)}L`
       : video.video_views > 1000
       ? `${(video.video_views / 1000).toFixed(1)}K`
-      : video.video_views.toLocaleString()
+      : video.video_views.toLocaleString("en-US")
     : "0";
 
   const timeAgo = video?.video_uploadDate
@@ -191,7 +191,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
     : "";
 
   const formattedDate = video?.video_uploadDate
-    ? new Date(video.video_uploadDate).toLocaleDateString(undefined, {
+    ? new Date(video.video_uploadDate).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -317,7 +317,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                   {/* Top Metadata Row: Views, Upload Time, and Badges */}
                   <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/30">
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-foreground">
-                      <span className="flex items-center gap-1.5 font-bold">
+                      <span suppressHydrationWarning className="flex items-center gap-1.5 font-bold">
                         <Eye className="w-4 h-4 text-primary shrink-0" />
                         {formattedViews} views
                       </span>

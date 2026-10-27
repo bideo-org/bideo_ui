@@ -341,7 +341,7 @@ export function Footer() {
 
         {/* Bottom Sub-bar */}
         <div className="border-t border-border/40 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground text-center sm:text-left">
-          <p>© {new Date().getFullYear()} BuzzClips | MIT License • 🇮🇳 Proudly Built in India</p>
+          <p suppressHydrationWarning>© {new Date().getFullYear()} BuzzClips | MIT License • 🇮🇳 Proudly Built in India</p>
 
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground border border-border/50 transition-colors">
             <span className="text-[11px] font-medium text-muted-foreground/80">

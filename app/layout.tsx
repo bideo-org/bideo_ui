@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { Navbar } from "../components/partials/Navbar";
 import { Footer } from "@/components/partials/Footer";
 import { MobileNav } from "@/components/partials/MobileNav";
@@ -8,6 +9,8 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/store/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import { ReactQueryProvider } from "@/components/providers/react-query-provider";
+import { NavigationProgress } from "@/components/ui/NavigationProgress";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -180,8 +183,14 @@ export default function RootLayout({
                 <div className="absolute -bottom-40 left-1/3 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-pink-500/5 dark:bg-pink-500/10 rounded-full blur-3xl" />
               </div>
 
+              <Suspense fallback={null}>
+                <NavigationProgress />
+              </Suspense>
+
               <Navbar />
-              <main className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">{children}</main>
+              <main className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
+                <PageTransition>{children}</PageTransition>
+              </main>
               <Footer />
               <MobileNav />
             </AuthProvider>
