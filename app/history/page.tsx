@@ -21,7 +21,6 @@ import {
   Trash2,
   Play,
   ArrowLeft,
-  Loader2,
   LogIn,
   CheckCircle2,
   User,
