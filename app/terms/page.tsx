@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowLeft, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Terms of Service | BuzzClips",
   description:

@@ -1,6 +1,19 @@
 "use client";
 
-import VideoPlayer from "@/components/player/VideoPlayer";
+import dynamic from "next/dynamic";
+
+const VideoPlayer = dynamic(() => import("@/components/player/VideoPlayer"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full aspect-video rounded-2xl bg-black/60 flex items-center justify-center border border-white/10 overflow-hidden relative">
+      <div className="w-full h-full bg-muted/20 animate-pulse" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-2 border-primary/40 border-t-primary animate-spin" />
+      </div>
+    </div>
+  ),
+});
+
 import {
   getVideoById,
   getVideoBySlug,

@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import CodeBlock from "@/components/CodeBlock";
 import { Separator } from "@/components/ui/separator";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Contributing Guide",
   description: "How to contribute to the UI repo using ShadCN and Next.js",

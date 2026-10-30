@@ -35,11 +35,13 @@ import { ALL_SEO_BUZZWORDS } from "@/constants/seoKeywords";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -178,11 +180,11 @@ export default function RootLayout({
           <LanguageProvider>
             <ReactQueryProvider>
               <AuthProvider>
-                {/* Global Ambient Glow (consistent across entire site) */}
-                <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden select-none">
-                  <div className="absolute -top-40 -left-40 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-blue-500/10 dark:bg-blue-500/15 rounded-full blur-3xl" />
-                  <div className="absolute top-1/3 -right-40 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-purple-500/10 dark:bg-purple-500/15 rounded-full blur-3xl" />
-                  <div className="absolute -bottom-40 left-1/3 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-pink-500/5 dark:bg-pink-500/10 rounded-full blur-3xl" />
+                {/* Global Ambient Glow (hardware-accelerated to prevent INP jank) */}
+                <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden select-none transform-gpu will-change-transform">
+                  <div className="absolute -top-40 -left-40 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-blue-500/10 dark:bg-blue-500/15 rounded-full blur-3xl transform-gpu" />
+                  <div className="absolute top-1/3 -right-40 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-purple-500/10 dark:bg-purple-500/15 rounded-full blur-3xl transform-gpu" />
+                  <div className="absolute -bottom-40 left-1/3 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-pink-500/5 dark:bg-pink-500/10 rounded-full blur-3xl transform-gpu" />
                 </div>
 
                 <Suspense fallback={null}>

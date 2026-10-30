@@ -90,30 +90,53 @@ function getBuildNumber(): string {
   return "";
 }
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const withBundleAnalyzer =
+  process.env.ANALYZE === "true"
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require("@next/bundle-analyzer")({ enabled: true })
+    : (config: NextConfig) => config;
+
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_GIT_COMMIT_SHA: getGitCommitSha(),
     NEXT_PUBLIC_BUILD_NUMBER: getBuildNumber(),
   },
   compress: true,
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["error", "warn"] }
+        : false,
+  },
   experimental: {
     optimizePackageImports: [
       "lucide-react",
       "date-fns",
       "framer-motion",
       "@tanstack/react-query",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-slot",
     ],
   },
   /* config options here */
   reactStrictMode: false,
   images: {
-    domains: [
-      "github.com",
-      "cdn.jsdelivr.net",
-      "buzzclips.app",
-      "bideo-tech-uploads.s3.ap-south-1.amazonaws.com",
-    ],
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 2592000,
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "github.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.jsdelivr.net",
+        pathname: "/**",
+      },
       {
         protocol: "https",
         hostname: "buzzclips.app",
@@ -139,4 +162,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

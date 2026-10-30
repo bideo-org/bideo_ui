@@ -1,4 +1,4 @@
-"use client";
+export const dynamic = "force-static";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";

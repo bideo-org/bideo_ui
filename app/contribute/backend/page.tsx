@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Contributing Guide - Spring Boot Backend",
   description: "How to contribute to the backend (Spring Boot) repository",
