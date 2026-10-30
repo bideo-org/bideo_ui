@@ -426,8 +426,14 @@ describe("EngagementButtons & CommentsSection", () => {
         );
       });
 
-      // Trigger time update
-      result.current.onTimeUpdate();
+      expect(result.current.savedProgress).toBe(45);
+
+      // Trigger time update with arguments
+      result.current.onTimeUpdate(55, 300);
+
+      // Trigger onPlay and onPause
+      result.current.onPlay(55, 300);
+      result.current.onPause(60, 300);
     });
   });
 });

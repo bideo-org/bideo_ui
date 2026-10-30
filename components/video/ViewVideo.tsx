@@ -68,7 +68,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
 
-  const { onTimeUpdate } = useResumePlayback({
+  const { onTimeUpdate, onPlay, onPause, savedProgress } = useResumePlayback({
     videoId: video?.videoId,
     playerRef,
     token: token || undefined,
@@ -231,6 +231,9 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                 vttUrl={video.vtt_url}
                 storyboardUrl={video.storyboard_url}
                 onTimeUpdate={onTimeUpdate}
+                onPlay={onPlay}
+                onPause={onPause}
+                initialTime={savedProgress}
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center bg-black/60">

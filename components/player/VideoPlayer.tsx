@@ -46,7 +46,10 @@ export interface VideoPlayerProps {
   poster?: string;
   vttUrl?: string;
   storyboardUrl?: string;
-  onTimeUpdate?: () => void;
+  onTimeUpdate?: (currentTime: number, duration: number) => void;
+  onPlay?: (currentTime: number, duration: number) => void;
+  onPause?: (currentTime: number, duration: number) => void;
+  initialTime?: number;
   isLive?: boolean;
   onPrevChannel?: () => void;
   onNextChannel?: () => void;
@@ -63,6 +66,9 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       src,
       poster,
       onTimeUpdate,
+      onPlay,
+      onPause,
+      initialTime,
       isLive = false,
       onPrevChannel,
       onNextChannel,
@@ -77,6 +83,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const hlsRef = useRef<Hls | null>(null);
     const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const seekRippleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const initialSeekDone = useRef(false);
 
     // Player State
     const [isPlaying, setIsPlaying] = useState(false);
@@ -177,6 +184,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       seekTo: (seconds: number) => {
         if (videoRef.current) {
           videoRef.current.currentTime = seconds;
+          setCurrentTime(seconds);
         }
       },
       getCurrentTime: () => videoRef.current?.currentTime || 0,
@@ -185,6 +193,22 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       pause: () => videoRef.current?.pause(),
       getInternalPlayer: () => videoRef.current,
     }));
+
+    // Auto-seek to initial saved playback progress once metadata loads
+    useEffect(() => {
+      if (
+        !isLive &&
+        initialTime &&
+        initialTime > 5 &&
+        !initialSeekDone.current &&
+        videoRef.current &&
+        videoRef.current.readyState >= 1
+      ) {
+        initialSeekDone.current = true;
+        videoRef.current.currentTime = initialTime;
+        setCurrentTime(initialTime);
+      }
+    }, [initialTime, isLive]);
 
     // Format seconds into MM:SS or HH:MM:SS
     const formatTime = (seconds: number) => {
@@ -671,14 +695,16 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const handleTimeUpdate = () => {
       const video = videoRef.current;
       if (!video) return;
-      setCurrentTime(video.currentTime);
+      const cur = video.currentTime;
+      const dur = video.duration || 0;
+      setCurrentTime(cur);
       if (video.buffered.length > 0) {
         setBufferedEnd(video.buffered.end(video.buffered.length - 1));
       }
       if (isLive) {
         setLiveRange(getLiveRange());
       }
-      onTimeUpdate?.();
+      onTimeUpdate?.(cur, dur);
     };
 
     // Calculate percentage played and buffered
@@ -717,8 +743,16 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           onPlay={() => {
             setIsPlaying(true);
             setIsBuffering(false);
+            if (videoRef.current) {
+              onPlay?.(videoRef.current.currentTime, videoRef.current.duration || 0);
+            }
           }}
-          onPause={() => setIsPlaying(false)}
+          onPause={() => {
+            setIsPlaying(false);
+            if (videoRef.current) {
+              onPause?.(videoRef.current.currentTime, videoRef.current.duration || 0);
+            }
+          }}
           onLoadStart={() => setIsBuffering(true)}
           onWaiting={() => setIsBuffering(true)}
           onSeeking={() => setIsBuffering(true)}
@@ -731,8 +765,14 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={() => {
             if (videoRef.current) {
-              setDuration(videoRef.current.duration);
+              const dur = videoRef.current.duration;
+              setDuration(dur);
               if (isLive) setLiveRange(getLiveRange());
+              if (!isLive && initialTime && initialTime > 5 && !initialSeekDone.current) {
+                initialSeekDone.current = true;
+                videoRef.current.currentTime = initialTime;
+                setCurrentTime(initialTime);
+              }
             }
           }}
           className="w-full h-full object-contain cursor-pointer"

@@ -719,8 +719,69 @@ export const getSubscriberCount = async (
 };
 
 // ==========================================
-// Phase 1: Watch History Feed
+// Phase 1: Watch History Feed & Progress Tracking
 // ==========================================
+
+export const recordWatchProgress = async (
+  videoId: number | string,
+  seconds: number,
+  duration?: number,
+  token?: string,
+  keepalive = false
+): Promise<WatchProgressDTO | null> => {
+  try {
+    const params = new URLSearchParams();
+    params.append("seconds", String(Math.max(0, Math.floor(seconds))));
+    if (duration !== undefined && !isNaN(duration)) {
+      params.append("duration", String(Math.max(0, Math.floor(duration))));
+    }
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(
+      `${api_instance}/vid/${videoId}/progress?${params.toString()}`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          seconds: Math.max(0, Math.floor(seconds)),
+          duration: duration !== undefined && !isNaN(duration) ? Math.max(0, Math.floor(duration)) : undefined,
+        }),
+        keepalive,
+      }
+    );
+
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+};
+
+export const fetchWatchProgress = async (
+  videoId: number | string,
+  token?: string
+): Promise<WatchProgressDTO | null> => {
+  try {
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const res = await fetch(`${api_instance}/vid/${videoId}/progress`, {
+      headers,
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+};
 
 export const fetchUserWatchHistory = async (
   page = 0,

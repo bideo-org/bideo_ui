@@ -851,6 +851,46 @@ describe("Video Requests Utility", () => {
         expect.objectContaining({ method: "DELETE" })
       );
     });
+
+    it("recordWatchProgress sends progress with query params and body", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ videoId: 42, progressSeconds: 85, durationSeconds: 200 }),
+      });
+      const { recordWatchProgress } = await import("@/utility/requests");
+
+      const res = await recordWatchProgress(42, 85, 200, "token-xyz", true);
+      expect(res?.progressSeconds).toBe(85);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/42/progress?seconds=85&duration=200`,
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({
+            Authorization: "Bearer token-xyz",
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify({ seconds: 85, duration: 200 }),
+          keepalive: true,
+        })
+      );
+    });
+
+    it("fetchWatchProgress fetches progress from api", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ videoId: 42, progressSeconds: 60 }),
+      });
+      const { fetchWatchProgress } = await import("@/utility/requests");
+
+      const res = await fetchWatchProgress(42, "token-xyz");
+      expect(res?.progressSeconds).toBe(60);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/42/progress`,
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: "Bearer token-xyz" }),
+        })
+      );
+    });
   });
 
   describe("Playlists & Watch Later Requests", () => {

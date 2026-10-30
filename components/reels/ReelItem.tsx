@@ -3,6 +3,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import ReactPlayer from "react-player";
 import { VideoDTO } from "@/types/video";
+import { useAuth } from "@/store/auth-context";
+import { recordWatchProgress } from "@/utility/requests";
 import { ReelActionRail } from "./ReelActionRail";
 import { ReelBottomOverlay } from "./ReelBottomOverlay";
 import { ReelCommentsDrawer } from "./ReelCommentsDrawer";
@@ -18,6 +20,7 @@ interface ReelItemProps {
 }
 
 export function ReelItem({ video, isActive, isMuted, onToggleMute }: ReelItemProps) {
+  const { token } = useAuth();
   const playerRef = useRef<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progressPercent, setProgressPercent] = useState(0);
@@ -30,6 +33,13 @@ export function ReelItem({ video, isActive, isMuted, onToggleMute }: ReelItemPro
   // Modals state
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
+
+  // Track watch history when reel plays
+  useEffect(() => {
+    if (isActive && isPlaying && video?.videoId) {
+      recordWatchProgress(video.videoId, 0, undefined, token || undefined);
+    }
+  }, [isActive, isPlaying, video?.videoId, token]);
 
   // Flash mute indicator whenever user toggles sound while active
   useEffect(() => {
