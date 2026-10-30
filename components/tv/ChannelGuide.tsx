@@ -11,6 +11,7 @@ import { ChannelCard } from "./ChannelCard";
 import { Input } from "@/components/ui/input";
 import { Search, Tv, X, Radio, Globe } from "lucide-react";
 import clsx from "clsx";
+import { useLanguage } from "@/store/language-context";
 
 interface ChannelGuideProps {
   channels: LiveChannel[];
@@ -23,6 +24,7 @@ export function ChannelGuide({
   activeChannel,
   onSelectChannel,
 }: ChannelGuideProps) {
+  const { t, formatNumber } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<ChannelCategory>("ALL");
   const [selectedRegion, setSelectedRegion] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,11 +102,11 @@ export function ChannelGuide({
                 id="live-channel-guide-title"
                 className="text-base font-bold text-foreground leading-tight whitespace-nowrap"
               >
-                Channel Guide
+                {t("tv.channelGuide")}
               </h2>
               <span className="whitespace-nowrap shrink-0 inline-flex flex-row items-center gap-1.5 text-[10px] font-mono font-bold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-                <span>{filteredChannels.length} Live</span>
+                <span>{formatNumber(filteredChannels.length)} {t("tv.liveBadge")}</span>
               </span>
             </div>
             <p className="text-[11px] text-muted-foreground font-medium truncate mt-0.5">
@@ -120,7 +122,7 @@ export function ChannelGuide({
         <Input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search channels, country, genres, languages..."
+          placeholder={`${t("common.search")}...`}
           className="pl-8 pr-8 h-8 text-xs bg-card/60 border-border/50 rounded-xl focus-visible:ring-1 focus-visible:ring-primary w-full"
         />
         {searchQuery && (

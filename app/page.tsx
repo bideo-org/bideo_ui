@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { fetchVideos } from "@/utility/requests";
-import { SITE_URL, generateFaqSchema } from "@/utility/seo";
+import { SITE_URL, generateFaqSchema, generateHreflangAlternates } from "@/utility/seo";
 import { PaginatedVideoResponse, VideoDTO } from "@/types/video";
 import ExploreClient from "@/components/explore/ExploreClient";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,6 +53,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: SITE_URL,
+    languages: generateHreflangAlternates(SITE_URL),
   },
   openGraph: {
     title: "BuzzClips - Free Video Streaming Website & Indian Live TV",

@@ -33,6 +33,7 @@ import { AVATARS } from "@/constants/avatars"; // Adjust the import path as nece
 import { Eye, EyeOff, Mail, Lock, User, AtSign, ArrowRight, Loader2, UserPlus, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { useUsernameAvailability, cleanHandle } from "@/utility/useUsernameAvailability";
 import { GoogleSignInButton } from "./GoogleSignInButton";
+import { useLanguage } from "@/store/language-context";
 
 const formSchema = z.object({
   fullName: z.string().max(100, { message: "Name must be under 100 characters" }).optional(),
@@ -45,6 +46,7 @@ const formSchema = z.object({
 });
 
 export function SignUpForm() {
+  const { t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const { setUsername, status, message, isAvailable, isChecking } =
     useUsernameAvailability();
@@ -92,10 +94,10 @@ export function SignUpForm() {
         <div className="h-1 w-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 mb-4" />
 
         <CardTitle className="text-2xl font-bold tracking-tight">
-          Create your account
+          {t("auth.signUpTitle")}
         </CardTitle>
         <CardDescription className="text-muted-foreground/80">
-          Join BuzzClips and start sharing videos
+          {t("auth.signUpSubtitle")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -308,7 +310,7 @@ export function SignUpForm() {
               ) : (
                 <span className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
-                  Create Account
+                  {t("auth.signUpButton")}
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </span>
               )}
@@ -317,12 +319,12 @@ export function SignUpForm() {
         </Form>
 
         <div className="text-center text-sm text-muted-foreground pt-1">
-          Already have an account?{" "}
+          {t("auth.hasAccount")}{" "}
           <Link
             href="/auth/login"
             className="font-semibold text-primary hover:text-primary/80 transition-colors"
           >
-            Sign in
+            {t("auth.signInButton")}
           </Link>
         </div>
       </CardContent>

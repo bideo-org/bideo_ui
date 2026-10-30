@@ -23,6 +23,7 @@ import axios from "axios";
 import { api_instance } from "@/global";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/store/language-context";
 
 import {
   Form,
@@ -94,6 +95,7 @@ const formSchema = z.object({
 
 export default function UploadPage() {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -668,7 +670,7 @@ export default function UploadPage() {
                 <FormItem>
                   <div className="flex items-center justify-between">
                     <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Video Title
+                      {t("upload.videoTitle")}
                     </FormLabel>
                     <span className="text-[11px] text-muted-foreground">
                       {videoTitle.length}/100
@@ -678,7 +680,7 @@ export default function UploadPage() {
                     <div className="relative">
                       <Film className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                       <Input
-                        placeholder="e.g. My Amazing Video"
+                        placeholder={t("upload.titlePlaceholder")}
                         className="pl-10 h-11 bg-muted/30 border-muted-foreground/15 rounded-lg text-sm focus-visible:border-primary/50"
                         maxLength={100}
                         disabled={formState.isSubmitting}
@@ -700,7 +702,7 @@ export default function UploadPage() {
                   <div className="flex items-center justify-between">
                     <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                       <AlignLeft className="w-3.5 h-3.5 text-muted-foreground/60" />
-                      Description
+                      {t("upload.description")}
                     </FormLabel>
                     <span className="text-[11px] text-muted-foreground">
                       {description.length}/2000
@@ -708,7 +710,7 @@ export default function UploadPage() {
                   </div>
                   <FormControl>
                     <Textarea
-                      placeholder="Tell viewers what your video is about (powers rich SEO description)..."
+                      placeholder={t("upload.descPlaceholder")}
                       className="min-h-24 bg-muted/30 border-muted-foreground/15 rounded-lg text-sm focus-visible:border-primary/50 resize-y"
                       maxLength={2000}
                       disabled={formState.isSubmitting}
@@ -847,7 +849,7 @@ export default function UploadPage() {
               ) : (
                 <span className="flex items-center gap-2">
                   <UploadCloud className="w-4 h-4" />
-                  Publish Video
+                  {t("upload.publishButton")}
                 </span>
               )}
             </Button>

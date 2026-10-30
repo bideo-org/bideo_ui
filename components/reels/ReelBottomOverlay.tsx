@@ -6,6 +6,7 @@ import { VideoDTO } from "@/types/video";
 import { Badge } from "@/components/ui/badge";
 import { Music } from "lucide-react";
 import clsx from "clsx";
+import { useLanguage } from "@/store/language-context";
 
 interface ReelBottomOverlayProps {
   video: VideoDTO;
@@ -13,6 +14,7 @@ interface ReelBottomOverlayProps {
 }
 
 export function ReelBottomOverlay({ video, progressPercent }: ReelBottomOverlayProps) {
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const uploader = video.video_uploader;
@@ -64,7 +66,7 @@ export function ReelBottomOverlay({ video, progressPercent }: ReelBottomOverlayP
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-[11px] font-semibold text-white/70 hover:text-white mt-0.5 inline-block focus:outline-none"
             >
-              {isExpanded ? "Show less" : "...more"}
+              {isExpanded ? t("watch.showLess") : t("watch.showMore")}
             </button>
           )}
         </div>

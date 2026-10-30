@@ -25,6 +25,7 @@ export const viewport: Viewport = {
 };
 import {
   SITE_URL,
+  generateHreflangAlternates,
   generateWebSiteSchema,
   generateOrganizationSchema,
   generateSiteNavigationSchema,
@@ -81,10 +82,24 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: SITE_URL,
+    languages: generateHreflangAlternates(SITE_URL),
   },
   openGraph: {
     type: "website",
     locale: "en_US",
+    alternateLocale: [
+      "hi_IN",
+      "bn_IN",
+      "te_IN",
+      "ta_IN",
+      "es_ES",
+      "fr_FR",
+      "de_DE",
+      "ja_JP",
+      "ar_SA",
+      "ru_RU",
+      "pt_BR",
+    ],
     url: SITE_URL,
     siteName: "BuzzClips",
     title: "BuzzClips - Next-Gen Video Streaming Platform",

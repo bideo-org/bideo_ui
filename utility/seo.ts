@@ -1,8 +1,23 @@
 import { VideoDTO, UserDTO } from "@/types/video";
 import { LiveChannel } from "@/constants/liveChannels";
+import { SUPPORTED_LANGUAGES } from "@/constants/locales";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://buzzclips.app";
+
+/**
+ * Generates Next.js metadata alternates.languages map for all 12 supported languages + x-default.
+ */
+export function generateHreflangAlternates(canonicalUrl: string): Record<string, string> {
+  const cleanUrl = canonicalUrl.split("?")[0];
+  const alternates: Record<string, string> = {
+    "x-default": cleanUrl,
+  };
+  for (const lang of SUPPORTED_LANGUAGES) {
+    alternates[lang.code] = `${cleanUrl}?hl=${lang.code}`;
+  }
+  return alternates;
+}
 
 /**
  * Normalizes any duration format (seconds, "MM:SS", "HH:MM:SS", or ISO 8601)
@@ -88,6 +103,7 @@ export function generateWebSiteSchema(siteUrl: string = SITE_URL) {
     ],
     description:
       "Free video streaming website, Indian Live TV platform, web series, short films, and viral reels featuring buffer-free adaptive HLS playback, creator community tools, and official FTA TV channels.",
+    inLanguage: SUPPORTED_LANGUAGES.map((l) => l.code),
     potentialAction: {
       "@type": "SearchAction",
       target: {

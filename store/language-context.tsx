@@ -41,7 +41,16 @@ function getInitialLocale(): LocaleCode {
     return DEFAULT_LOCALE;
   }
 
-  // 1. Check document cookie
+  // 1. Check URL query parameters ?hl= or ?lang=
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const hl = params.get("hl") || params.get("lang");
+    if (hl && isValidLocale(hl)) {
+      return hl;
+    }
+  } catch {}
+
+  // 2. Check document cookie
   const match = document.cookie.match(
     new RegExp(`(?:^|; )${LOCALE_COOKIE_NAME}=([^;]*)`)
   );
@@ -49,7 +58,7 @@ function getInitialLocale(): LocaleCode {
     return match[1];
   }
 
-  // 2. Check localStorage
+  // 3. Check localStorage
   try {
     const saved = localStorage.getItem(LOCALE_COOKIE_NAME);
     if (saved && isValidLocale(saved)) {
@@ -57,7 +66,7 @@ function getInitialLocale(): LocaleCode {
     }
   } catch {}
 
-  // 3. Check browser navigator language
+  // 4. Check browser navigator language
   if (typeof navigator !== "undefined" && navigator.language) {
     const browserCode = navigator.language.split("-")[0]?.toLowerCase();
     if (isValidLocale(browserCode)) {
@@ -82,12 +91,24 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const setLocale = useCallback((newLocale: LocaleCode) => {
     setLocaleState(newLocale);
 
-    // Save in cookie (1 year expiration)
+    // Save in cookie (1 year expiration) and sync URL / DOM
     try {
       document.cookie = `${LOCALE_COOKIE_NAME}=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
       localStorage.setItem(LOCALE_COOKIE_NAME, newLocale);
       document.documentElement.lang = newLocale;
       document.documentElement.dir = newLocale === "ar" ? "rtl" : "ltr";
+
+      // Synchronize ?hl= query param without reloading the page
+      if (typeof window !== "undefined" && window.location) {
+        const url = new URL(window.location.href);
+        if (newLocale === DEFAULT_LOCALE) {
+          url.searchParams.delete("hl");
+          url.searchParams.delete("lang");
+        } else {
+          url.searchParams.set("hl", newLocale);
+        }
+        window.history.replaceState(null, "", url.toString());
+      }
     } catch {}
   }, []);
 

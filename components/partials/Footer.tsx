@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Github, Linkedin, GitCommit } from "lucide-react";
 import { LanguageSwitcher } from "@/components/partials/LanguageSwitcher";
+import { useLanguage } from "@/store/language-context";
 
 const creators = [
   {
@@ -28,6 +29,7 @@ try {
 
 export function Footer() {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   if (pathname === "/reels" || pathname?.startsWith("/reels/") || pathname?.startsWith("/embed")) {
     return null;
@@ -55,16 +57,14 @@ export function Footer() {
                 About | BuzzClips
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed max-w-sm">
-                BuzzClips is a modern platform built to share, explore, and enjoy videos
-                from around the world. Crafted with passion by a small team of 2
-                developers who love tech.
+                {t("footer.tagline")}
               </p>
             </div>
 
             {/* Creators - Compact inline cards */}
             <div className="space-y-2">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
-                Creators
+                {t("footer.creatorsTitle")}
               </h4>
               <div className="flex flex-wrap sm:flex-col gap-2">
                 {creators.map((creator) => (
@@ -210,27 +210,27 @@ export function Footer() {
             {/* Legal & Trust */}
             <div className="space-y-2 col-span-2 sm:col-span-1 min-w-0">
               <h4 className="font-semibold text-foreground text-xs uppercase tracking-wider">
-                Legal & Trust
+                {t("footer.legalHeader")}
               </h4>
               <ul className="space-y-1.5 text-xs">
                 <li>
                   <Link href="/terms" className="hover:text-foreground transition-colors">
-                    Terms of Service
+                    {t("footer.terms")}
                   </Link>
                 </li>
                 <li>
                   <Link href="/privacy" className="hover:text-foreground transition-colors">
-                    Privacy Policy
+                    {t("footer.privacy")}
                   </Link>
                 </li>
                 <li>
                   <Link href="/dmca" className="hover:text-foreground transition-colors">
-                    Copyright / DMCA
+                    {t("footer.dmca")}
                   </Link>
                 </li>
                 <li>
                   <Link href="/guidelines" className="hover:text-foreground transition-colors">
-                    Community Guidelines
+                    {t("footer.guidelines")}
                   </Link>
                 </li>
                 <li>
@@ -342,7 +342,7 @@ export function Footer() {
 
         {/* Bottom Sub-bar */}
         <div className="border-t border-border/40 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground text-center sm:text-left">
-          <p suppressHydrationWarning>© {new Date().getFullYear()} BuzzClips | MIT License • 🇮🇳 Proudly Built in India</p>
+          <p suppressHydrationWarning>© {new Date().getFullYear()} BuzzClips | {t("footer.license")}</p>
 
           <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-end">
             <LanguageSwitcher variant="full" />

@@ -13,6 +13,7 @@ import { MESSAGES } from "@/constants/messages";
 import { Search, X, Film, Tag } from "lucide-react";
 import { VideoDTO, PaginatedVideoResponse } from "@/types/video";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/store/language-context";
 
 export const CATEGORIES: { label: string; value: string; slug: string; icon?: string }[] = [
   { label: "All", value: "ALL", slug: "", icon: "🔥" },
@@ -40,6 +41,7 @@ export default function ExploreClient({
   defaultCategory = "ALL",
   defaultTag = "",
 }: ExploreClientProps) {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const router = useRouter();
   const observerRef = useRef<HTMLDivElement | null>(null);
@@ -226,7 +228,7 @@ export default function ExploreClient({
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
               type="text"
-              placeholder="Search videos by title or topic..."
+              placeholder={t("explore.searchPlaceholder")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="pl-10 pr-20 h-11 bg-card/80 border-border/60 backdrop-blur-sm rounded-full shadow-sm text-sm focus-visible:border-primary/50"
@@ -247,7 +249,7 @@ export default function ExploreClient({
                 size="sm"
                 className="h-8 rounded-full px-3 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                Search
+                {t("explore.searchButton")}
               </Button>
             </div>
           </form>
@@ -397,12 +399,12 @@ export default function ExploreClient({
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-lg text-foreground">
-                No videos found
+                {t("explore.noVideosFound")}
               </h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 {isFiltered
-                  ? "We couldn't find any videos matching your search or filters. Try searching with broader terms or check other categories."
-                  : "No public videos are available at the moment. Be the first to upload one!"}
+                  ? t("explore.noVideosDesc")
+                  : t("explore.noPublicVideos")}
               </p>
             </div>
             {isFiltered && (
@@ -415,7 +417,7 @@ export default function ExploreClient({
                   setActiveTag("");
                 }}
               >
-                Clear Search & Filters
+                {t("explore.clearFilters")}
               </Button>
             )}
           </div>
@@ -425,7 +427,7 @@ export default function ExploreClient({
 
         {!hasNextPage && videoList.length > 0 && (
           <p className="text-center text-muted-foreground py-6 text-sm">
-            {MESSAGES.END_OF_VIDEO_LIST}
+            {t("explore.endOfList")}
           </p>
         )}
       </div>

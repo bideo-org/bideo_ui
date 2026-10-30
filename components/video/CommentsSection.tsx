@@ -22,6 +22,7 @@ import {
 import { CommentDTO } from "@/types/video";
 import { api_instance } from "@/global";
 import { useAuth } from "@/store/auth-context";
+import { useLanguage } from "@/store/language-context";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -48,6 +49,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   onSeekTo,
 }) => {
   const { token, user, uid } = useAuth();
+  const { t, formatNumber } = useLanguage();
 
   const [comments, setComments] = useState<CommentDTO[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -736,7 +738,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
         <div className="flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-bold tracking-tight text-foreground">
-            {comments.length} {comments.length === 1 ? "Comment" : "Comments"}
+            {formatNumber(comments.length)} {t("comments.title")}
           </h2>
         </div>
       </div>
@@ -756,7 +758,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
               type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment... (Tip: type 01:23 to tag a timestamp!)"
+              placeholder={t("comments.addCommentPlaceholder")}
               className="bg-card/75 border-border/60 rounded-xl px-4 h-11 text-sm focus-visible:border-primary/50"
             />
             <div className="flex justify-end gap-2">
@@ -768,7 +770,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                   onClick={() => setNewComment("")}
                   className="rounded-full text-xs"
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               )}
               <Button
@@ -778,7 +780,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                 className="rounded-full px-4 h-8 text-xs font-semibold bg-primary text-primary-foreground gap-1.5 hover:bg-primary/90"
               >
                 <Send className="w-3 h-3" />
-                Comment
+                {t("comments.postComment")}
               </Button>
             </div>
           </div>
@@ -802,7 +804,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
         {comments.length === 0 && (
           <div className="text-center py-8 text-sm text-muted-foreground">
-            No comments yet. Be the first to share your thoughts!
+            {t("comments.noComments")}
           </div>
         )}
       </div>

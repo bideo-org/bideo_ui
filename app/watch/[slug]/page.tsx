@@ -6,6 +6,7 @@ import {
   SITE_URL,
   generateVideoJsonLd,
   generateBreadcrumbSchema,
+  generateHreflangAlternates,
 } from "@/utility/seo";
 
 export const revalidate = 60; // Incremental Static Regeneration every 60 seconds
@@ -34,6 +35,7 @@ export async function generateMetadata({
         description,
         alternates: {
           canonical: canonicalUrl,
+          languages: generateHreflangAlternates(canonicalUrl),
           types: {
             "application/json+oembed": `${baseUrl}/api/oembed?url=${encodeURIComponent(
               canonicalUrl
@@ -96,6 +98,7 @@ export async function generateMetadata({
     title: "Watch Video | BuzzClips",
     alternates: {
       canonical: canonicalUrl,
+      languages: generateHreflangAlternates(canonicalUrl),
       types: {
         "application/json+oembed": `${baseUrl}/api/oembed?url=${encodeURIComponent(
           canonicalUrl

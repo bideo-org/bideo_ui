@@ -1,6 +1,7 @@
 import { api_instance } from "@/global";
 import { PaginatedVideoResponse, VideoDTO } from "@/types/video";
 import { SITE_URL } from "@/utility/seo";
+import { SUPPORTED_LANGUAGES } from "@/constants/locales";
 
 function escapeXml(str: string): string {
   return str.replace(/[<>&'"]/g, (char) => {
@@ -98,8 +99,19 @@ export async function GET() {
         .map((tag) => `      <video:tag>${escapeXml(tag)}</video:tag>`)
         .join("\n");
 
+      const alternatesXml = [
+        `    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(watchUrl)}" />`,
+        ...SUPPORTED_LANGUAGES.map(
+          (lang) =>
+            `    <xhtml:link rel="alternate" hreflang="${lang.code}" href="${escapeXml(
+              watchUrl
+            )}?hl=${lang.code}" />`
+        ),
+      ].join("\n");
+
       return `  <url>
     <loc>${escapeXml(watchUrl)}</loc>
+${alternatesXml}
     <video:video>
       <video:thumbnail_loc>${escapeXml(thumbnail)}</video:thumbnail_loc>
       <video:title>${title}</video:title>
@@ -125,7 +137,8 @@ ${tagsXml ? tagsXml + "\n" : ""}    </video:video>
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${videoEntries}
 </urlset>`;
 

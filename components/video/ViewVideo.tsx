@@ -29,6 +29,7 @@ import { SubscribeButton } from "@/components/channel/SubscribeButton";
 import { SaveToPlaylistModal } from "./SaveToPlaylistModal";
 import useResumePlayback from "@/utility/useResumePlayback";
 import { useAuth } from "@/store/auth-context";
+import { useLanguage } from "@/store/language-context";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -60,6 +61,7 @@ interface ViewVideoProps {
 
 export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
   const { token } = useAuth();
+  const { t } = useLanguage();
   const playerRef = useRef<any>(null);
   const [video, setVideo] = useState<VideoDTO | null>(initialVideo || null);
   const [error, setError] = useState<string | null>(null);
@@ -332,7 +334,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-foreground">
                       <span suppressHydrationWarning className="flex items-center gap-1.5 font-bold">
                         <Eye className="w-4 h-4 text-primary shrink-0" />
-                        {formattedViews} views
+                        {formattedViews} {t("watch.views")}
                       </span>
                       <span className="text-muted-foreground/40">•</span>
                       <span suppressHydrationWarning className="text-muted-foreground font-medium">
@@ -407,7 +409,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                           aria-expanded={isDescExpanded}
                           aria-label={isDescExpanded ? "Show less description" : "View more description"}
                         >
-                          <span>{isDescExpanded ? "Show less" : "View more"}</span>
+                          <span>{isDescExpanded ? t("watch.showLess") : t("watch.showMore")}</span>
                           <ChevronDown
                             className={clsx(
                               "w-3.5 h-3.5 transition-transform duration-200",
@@ -554,7 +556,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                         {item.video_uploader?.user_name || "Creator"}
                       </p>
                       <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5 flex-wrap">
-                        <span>{itemViews} views</span>
+                        <span>{itemViews} {t("watch.views")}</span>
                         <span>•</span>
                         <span suppressHydrationWarning>{itemTimeAgo}</span>
                       </div>

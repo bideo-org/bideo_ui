@@ -26,6 +26,7 @@ import Link from "next/link";
 import { loginUser, verifyToken } from "../../utility/requests";
 import { toast } from "sonner";
 import { useAuth } from "@/store/auth-context";
+import { useLanguage } from "@/store/language-context";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { MESSAGES } from "@/constants/messages";
@@ -41,6 +42,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -111,11 +113,11 @@ export function LoginForm() {
           {message ? (
             <span className="text-green-500">{message}</span>
           ) : (
-            "Welcome back"
+            t("auth.signInTitle")
           )}
         </CardTitle>
         <CardDescription className="text-muted-foreground/80">
-          Enter your credentials to access your account
+          {t("auth.signInSubtitle")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -166,13 +168,13 @@ export function LoginForm() {
                 <FormItem>
                   <div className="flex items-center justify-between">
                     <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Password
+                      {t("auth.passwordLabel")}
                     </FormLabel>
                     <Link
                       href="/auth/reset"
                       className="text-xs text-primary/70 hover:text-primary transition-colors"
                     >
-                      Forgot password?
+                      {t("auth.forgotPassword")}
                     </Link>
                   </div>
                   <FormControl>
@@ -217,18 +219,18 @@ export function LoginForm() {
               ) : (
                 <span className="flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
-                  Sign In
+                  {t("auth.signInButton")}
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </span>
               )}
             </Button>
             <div className="text-center text-sm text-muted-foreground pt-1">
-              Don&apos;t have an account?{" "}
+              {t("auth.noAccount")}{" "}
               <Link
                 href="/auth/signup"
                 className="font-semibold text-primary hover:text-primary/80 transition-colors"
               >
-                Create one
+                {t("auth.signUpButton")}
               </Link>
             </div>
           </form>

@@ -14,6 +14,7 @@ import {
   Check,
 } from "lucide-react";
 import { useAuth } from "@/store/auth-context";
+import { useLanguage } from "@/store/language-context";
 import { api_instance } from "@/global";
 import { toast } from "sonner";
 import clsx from "clsx";
@@ -34,6 +35,7 @@ export function ReelActionRail({
   onOpenSaveModal,
 }: ReelActionRailProps) {
   const { token } = useAuth();
+  const { t, formatNumber } = useLanguage();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(video.video_views ? Math.floor(video.video_views * 0.12) : 24);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
@@ -127,7 +129,7 @@ export function ReelActionRail({
           />
         </div>
         <span className="text-[11px] font-bold tracking-tight drop-shadow-md">
-          {likeCount.toLocaleString()}
+          {formatNumber(likeCount)}
         </span>
       </button>
 
@@ -141,7 +143,7 @@ export function ReelActionRail({
           <MessageCircle className="w-6 h-6 text-white group-hover:text-blue-400 transition-colors" />
         </div>
         <span className="text-[11px] font-bold tracking-tight drop-shadow-md">
-          Comments
+          {t("reels.comments")}
         </span>
       </button>
 
@@ -155,7 +157,7 @@ export function ReelActionRail({
           <Bookmark className="w-5 h-5 text-white group-hover:text-amber-400 transition-colors" />
         </div>
         <span className="text-[11px] font-bold tracking-tight drop-shadow-md">
-          Save
+          {t("common.save")}
         </span>
       </button>
 
@@ -173,7 +175,7 @@ export function ReelActionRail({
           )}
         </div>
         <span className="text-[11px] font-bold tracking-tight drop-shadow-md">
-          {isCopied ? "Copied" : "Share"}
+          {isCopied ? t("common.copied") : t("common.share")}
         </span>
       </button>
 

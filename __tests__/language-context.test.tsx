@@ -7,6 +7,7 @@ import {
 import { LanguageSwitcher } from "@/components/partials/LanguageSwitcher";
 import { SUPPORTED_LANGUAGES, isValidLocale } from "@/constants/locales";
 import { getTranslation } from "@/constants/translations";
+import { generateHreflangAlternates } from "@/utility/seo";
 
 function TestConsumer() {
   const { locale, setLocale, t, formatNumber, formatDate, isRTL } =
@@ -124,5 +125,34 @@ describe("Language Context & Switcher", () => {
 
   it("contains all 12 supported languages", () => {
     expect(SUPPORTED_LANGUAGES.length).toBe(12);
+  });
+
+  it("translates new watch, comments, upload, and auth namespaces across languages", () => {
+    expect(getTranslation("en", "watch.views")).toBe("views");
+    expect(getTranslation("hi", "watch.views")).toBe("दृश्य");
+    expect(getTranslation("bn", "watch.views")).toBe("ভিউ");
+    expect(getTranslation("es", "watch.views")).toBe("vistas");
+    expect(getTranslation("fr", "watch.views")).toBe("vues");
+    expect(getTranslation("de", "watch.views")).toBe("Aufrufe");
+    expect(getTranslation("ja", "watch.views")).toBe("回視聴");
+    expect(getTranslation("ar", "watch.views")).toBe("مشاهدة");
+    expect(getTranslation("ru", "watch.views")).toBe("просмотров");
+    expect(getTranslation("pt", "watch.views")).toBe("visualizações");
+    expect(getTranslation("te", "watch.views")).toBe("వీక్షణలు");
+    expect(getTranslation("ta", "watch.views")).toBe("பார்வைகள்");
+
+    expect(getTranslation("en", "comments.title")).toBe("Comments");
+    expect(getTranslation("hi", "comments.title")).toBe("टिप्पणियाँ");
+    expect(getTranslation("en", "upload.publishButton")).toBe("Publish Video");
+    expect(getTranslation("en", "auth.signInTitle")).toBe("Welcome back to BuzzClips");
+  });
+
+  it("generates correct hreflang alternate links for SEO", () => {
+    const alternates = generateHreflangAlternates("https://buzzclips.app/watch/clip-123");
+    expect(alternates["x-default"]).toBe("https://buzzclips.app/watch/clip-123");
+    expect(alternates["en"]).toBe("https://buzzclips.app/watch/clip-123?hl=en");
+    expect(alternates["hi"]).toBe("https://buzzclips.app/watch/clip-123?hl=hi");
+    expect(alternates["es"]).toBe("https://buzzclips.app/watch/clip-123?hl=es");
+    expect(Object.keys(alternates).length).toBe(13); // 12 languages + x-default
   });
 });

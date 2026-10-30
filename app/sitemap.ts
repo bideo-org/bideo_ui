@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { api_instance } from "@/global";
 import { PaginatedVideoResponse } from "@/types/video";
-import { SITE_URL } from "@/utility/seo";
+import { SITE_URL, generateHreflangAlternates } from "@/utility/seo";
 import { ALL_LIVE_CHANNELS } from "@/constants/liveChannels";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -13,24 +13,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
+      alternates: {
+        languages: generateHreflangAlternates(baseUrl),
+      },
     },
     {
       url: `${baseUrl}/tv`,
       lastModified: new Date(),
       changeFrequency: "always",
       priority: 1.0,
+      alternates: {
+        languages: generateHreflangAlternates(`${baseUrl}/tv`),
+      },
     },
     {
       url: `${baseUrl}/reels`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
+      alternates: {
+        languages: generateHreflangAlternates(`${baseUrl}/reels`),
+      },
     },
     {
       url: `${baseUrl}/trending`,
       lastModified: new Date(),
       changeFrequency: "hourly",
       priority: 0.9,
+      alternates: {
+        languages: generateHreflangAlternates(`${baseUrl}/trending`),
+      },
     },
     ...ALL_LIVE_CHANNELS.map((channel) => ({
       url: `${baseUrl}/tv?channel=${channel.id}`,

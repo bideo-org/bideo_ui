@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { EngagementDTO } from "@/types/video";
 import { api_instance } from "@/global";
 import { useAuth } from "@/store/auth-context";
+import { useLanguage } from "@/store/language-context";
 
 interface EngagementButtonsProps {
   videoId: number;
@@ -20,6 +21,7 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
   onSave,
 }) => {
   const { token } = useAuth();
+  const { t, formatNumber } = useLanguage();
 
   const [data, setData] = useState<EngagementDTO>(
     initialEngagement || {
@@ -157,7 +159,7 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
           <ThumbsUp
             className={`w-3.5 h-3.5 ${data.userReaction === "LIKE" ? "fill-current" : ""}`}
           />
-          <span>{data.likesCount.toLocaleString()}</span>
+          <span>{formatNumber(data.likesCount)}</span>
         </Button>
 
         <span className="h-4 w-px bg-border/60 mx-0.5" />
@@ -192,7 +194,7 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
         ) : (
           <Share2 className="w-3.5 h-3.5" />
         )}
-        <span>{copied ? "Copied" : "Share"}</span>
+        <span>{copied ? t("common.copied") : t("common.share")}</span>
       </Button>
 
       {/* Save Button */}
@@ -206,7 +208,7 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
           aria-label="Save video"
         >
           <BookmarkPlus className="w-3.5 h-3.5 text-primary" />
-          <span>Save</span>
+          <span>{t("common.save")}</span>
         </Button>
       )}
     </div>
