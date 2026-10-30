@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import { Navbar } from "../components/partials/Navbar";
+import { LanguageNoticeBanner } from "@/components/partials/LanguageNoticeBanner";
 import { Footer } from "@/components/partials/Footer";
 import { MobileNav } from "@/components/partials/MobileNav";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -48,11 +49,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BuzzClips - Free Indian TV & Next-Gen Video Streaming Platform",
-    template: "%s | BuzzClips",
+    default: "BuzzClips (Buzz Clips) - Free Indian TV & Next-Gen Video Streaming Platform",
+    template: "%s | BuzzClips (Buzz Clips)",
   },
   description:
-    "Watch free Indian TV live, trending viral clips, gaming highlights, and creator shorts on BuzzClips. Fast buffer-free adaptive HLS video streaming with zero lag.",
+    "Watch free Indian TV live, trending viral clips, gaming highlights, and creator shorts on BuzzClips (Buzz Clips). Fast buffer-free adaptive HLS video streaming with zero lag.",
   applicationName: "BuzzClips",
   appleWebApp: {
     capable: true,
@@ -207,6 +208,7 @@ export default function RootLayout({
                 </Suspense>
 
                 <Navbar />
+                <LanguageNoticeBanner />
                 <main className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
                   <PageTransition>{children}</PageTransition>
                 </main>

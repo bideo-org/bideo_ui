@@ -64,6 +64,12 @@ describe("Video Sitemap XML Route", () => {
 
     // Private video must NOT be in the sitemap
     expect(xml).not.toContain("private-video");
+
+    // Live Channels (DD Sports, etc.) must be in the sitemap with <video:live>yes</video:live>
+    expect(xml).toContain("https://buzzclips.app/tv/dd-sports");
+    expect(xml).toContain("DD Sports Live Streaming (Free FTA)");
+    expect(xml).toContain("<video:live>yes</video:live>");
+    expect(xml).toContain("<video:tag>dd sports live streaming</video:tag>");
   });
 
   it("handles ISO-8601 duration and HH:MM:SS format correctly", async () => {
@@ -91,13 +97,15 @@ describe("Video Sitemap XML Route", () => {
     expect(xml).toContain("<video:duration>4530</video:duration>");
   });
 
-  it("handles backend fetch failure gracefully returning empty urlset", async () => {
+  it("handles backend fetch failure gracefully while still serving live TV channels", async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error("Database offline"));
 
     const response = await GET();
     expect(response.status).toBe(200);
     const xml = await response.text();
     expect(xml).toContain("<urlset");
-    expect(xml).not.toContain("<video:video>");
+    expect(xml).toContain("https://buzzclips.app/tv/dd-sports");
+    expect(xml).toContain("<video:live>yes</video:live>");
+    expect(xml).not.toContain("learn-nextjs-react");
   });
 });

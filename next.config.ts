@@ -123,6 +123,17 @@ const nextConfig: NextConfig = {
   },
   /* config options here */
   reactStrictMode: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Language", value: "en" },
+          { key: "Vary", value: "Accept-Language" },
+        ],
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 2592000,

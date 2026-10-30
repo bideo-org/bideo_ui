@@ -45,10 +45,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     },
     ...ALL_LIVE_CHANNELS.map((channel) => ({
-      url: `${baseUrl}/tv?channel=${channel.id}`,
+      url: `${baseUrl}/tv/${channel.id}`,
       lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.85,
+      changeFrequency: "always" as const,
+      priority: channel.id === "dd-sports" || channel.id === "dd-national" ? 0.95 : 0.9,
+      alternates: {
+        languages: generateHreflangAlternates(`${baseUrl}/tv/${channel.id}`),
+      },
     })),
     {
       url: `${baseUrl}/auth/login`,

@@ -103,6 +103,13 @@ export function generateWebSiteSchema(siteUrl: string = SITE_URL) {
     ],
     description:
       "Free video streaming website, Indian Live TV platform, web series, short films, and viral reels featuring buffer-free adaptive HLS playback, creator community tools, and official FTA TV channels.",
+    disambiguatingDescription:
+      "BuzzClips (also known as Buzz Clips or Buzz Clip) is a free video streaming and Indian live TV broadcast platform.",
+    brand: {
+      "@type": "Brand",
+      name: "BuzzClips",
+      alternateName: ["Buzz Clips", "Buzz Clip"],
+    },
     inLanguage: SUPPORTED_LANGUAGES.map((l) => l.code),
     potentialAction: {
       "@type": "SearchAction",
@@ -142,6 +149,13 @@ export function generateOrganizationSchema(siteUrl: string = SITE_URL) {
       "बज़क्लिप्स",
       "बज़ क्लिप्स",
     ],
+    disambiguatingDescription:
+      "BuzzClips (also known as Buzz Clips or Buzz Clip) is a free video streaming and Indian live TV broadcast platform.",
+    brand: {
+      "@type": "Brand",
+      name: "BuzzClips",
+      alternateName: ["Buzz Clips", "Buzz Clip"],
+    },
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
@@ -242,9 +256,9 @@ export function generateSoftwareApplicationSchema(siteUrl: string = SITE_URL) {
 export function generateFaqSchema(siteUrl: string = SITE_URL) {
   const faqs = [
     {
-      question: "What is BuzzClips?",
+      question: "What is BuzzClips (Buzz Clips)?",
       answer:
-        "BuzzClips is a next-generation video streaming and creator clip platform that delivers lightning-fast, buffer-free video playback powered by adaptive HLS technology. Viewers can watch trending viral clips, gaming highlights, tech tutorials, and entertainment videos, while creators can upload and share content effortlessly.",
+        "BuzzClips (also known as Buzz Clips or Buzz Clip) is a next-generation video streaming and creator clip platform that delivers lightning-fast, buffer-free video playback powered by adaptive HLS technology. Viewers can watch trending viral clips, gaming highlights, tech tutorials, and entertainment videos, alongside official Free-To-Air Indian Live TV channels.",
     },
     {
       question: "Is BuzzClips completely free to watch and use?",
@@ -533,6 +547,61 @@ export function generateLiveTvFaqSchema(siteUrl: string = SITE_URL) {
     })),
   };
 }
+
+/**
+ * Generates channel-specific Schema.org FAQPage for dedicated TV channel landing pages.
+ */
+export function generateSingleChannelFaqSchema(
+  channel: LiveChannel,
+  siteUrl: string = SITE_URL
+) {
+  const isDdSports = channel.id === "dd-sports";
+  const isDdNational = channel.id === "dd-national";
+
+  const faqs = [
+    {
+      question: `How can I watch ${channel.name} live streaming online for free?`,
+      answer: `You can watch ${channel.name} live stream 100% free in HD on BuzzClips TV at ${siteUrl}/tv/${channel.id}. No subscription, payment, or account registration is required.`,
+    },
+    isDdSports
+      ? {
+          question: "Does DD Sports broadcast live cricket and national sporting events?",
+          answer:
+            "Yes! DD Sports is India's premier public sports broadcaster airing live coverage of Indian national cricket matches (ODIs, T20Is, and Tests), Olympic games, Asian Games, National Games, and major hockey tournaments free-to-air.",
+        }
+      : {
+          question: `What type of programs are broadcast on ${channel.name}?`,
+          answer: `${channel.name} broadcasts official Free-To-Air ${channel.category.toLowerCase()} programming by ${channel.broadcaster} in ${channel.language.join(", ")}, with adaptive bitrate streaming up to ${channel.resolution || "1080p HD"}.`,
+        },
+    isDdSports || isDdNational
+      ? {
+          question: `Is ${channel.name} an official Doordarshan channel?`,
+          answer: `Yes, ${channel.name} (${channel.hindiName || channel.name}) is an official Free-To-Air public broadcast operated by Prasar Bharati (Doordarshan), India's national public service broadcaster.`,
+        }
+      : {
+          question: `Is ${channel.name} legal and safe to watch on BuzzClips TV?`,
+          answer: `Yes, BuzzClips TV features legitimate, authorized Free-To-Air (FTA) public service streams provided directly by official broadcasters from ${channel.country}.`,
+        },
+    {
+      question: `Does ${channel.name} live stream support mobile devices?`,
+      answer: `Yes, ${channel.name} utilizes adaptive HLS streaming, automatically adapting across 1080p, 720p, and 480p on iOS, Android, macOS, and Windows devices with zero buffering.`,
+    },
+  ];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
 
 
 

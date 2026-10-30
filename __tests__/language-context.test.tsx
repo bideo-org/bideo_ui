@@ -5,6 +5,7 @@ import {
   useLanguage,
 } from "@/store/language-context";
 import { LanguageSwitcher } from "@/components/partials/LanguageSwitcher";
+import { LanguageNoticeBanner } from "@/components/partials/LanguageNoticeBanner";
 import { SUPPORTED_LANGUAGES, isValidLocale } from "@/constants/locales";
 import { getTranslation } from "@/constants/translations";
 import { generateHreflangAlternates } from "@/utility/seo";
@@ -154,5 +155,40 @@ describe("Language Context & Switcher", () => {
     expect(alternates["hi"]).toBe("https://buzzclips.app/watch/clip-123?hl=hi");
     expect(alternates["es"]).toBe("https://buzzclips.app/watch/clip-123?hl=es");
     expect(Object.keys(alternates).length).toBe(13); // 12 languages + x-default
+  });
+
+  it("renders LanguageNoticeBanner when locale is not English and switches to English on click", () => {
+    sessionStorage.clear();
+
+    function BannerTest() {
+      const { setLocale } = useLanguage();
+      return (
+        <div>
+          <LanguageNoticeBanner />
+          <button onClick={() => setLocale("hi")}>Go Hindi</button>
+        </div>
+      );
+    }
+
+    render(
+      <LanguageProvider>
+        <BannerTest />
+      </LanguageProvider>
+    );
+
+    // Default is English, banner is not rendered
+    expect(screen.queryByText("Convert to English")).not.toBeInTheDocument();
+
+    // Switch to Hindi
+    fireEvent.click(screen.getByText("Go Hindi"));
+
+    // Now banner should be visible
+    expect(screen.getByText("Convert to English")).toBeInTheDocument();
+
+    // Clicking Convert to English
+    fireEvent.click(screen.getByText("Convert to English"));
+
+    // Banner should be hidden again
+    expect(screen.queryByText("Convert to English")).not.toBeInTheDocument();
   });
 });

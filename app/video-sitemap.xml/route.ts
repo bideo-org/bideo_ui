@@ -2,6 +2,7 @@ import { api_instance } from "@/global";
 import { PaginatedVideoResponse, VideoDTO } from "@/types/video";
 import { SITE_URL } from "@/utility/seo";
 import { SUPPORTED_LANGUAGES } from "@/constants/locales";
+import { ALL_LIVE_CHANNELS } from "@/constants/liveChannels";
 
 function escapeXml(str: string): string {
   return str.replace(/[<>&'"]/g, (char) => {
@@ -135,11 +136,77 @@ ${tagsXml ? tagsXml + "\n" : ""}    </video:video>
     })
     .join("\n");
 
+  const liveChannelEntries = ALL_LIVE_CHANNELS.map((channel) => {
+    const channelUrl = `${baseUrl}/tv/${channel.id}`;
+    const isDdSports = channel.id === "dd-sports";
+    const title = isDdSports
+      ? "DD Sports Live Streaming (Free FTA) - Watch Live Cricket &amp; Sports HD"
+      : `${escapeXml(channel.name)} Live Streaming - Watch ${escapeXml(channel.name)} Free HD | BuzzClips TV`;
+    const description = escapeXml(
+      isDdSports
+        ? "Watch DD Sports live stream free online in HD on BuzzClips TV. Official Doordarshan sports channel broadcasting live cricket matches, hockey, athletics, and tournaments with zero buffering."
+        : `Watch ${channel.name} (${channel.hindiName || channel.name}) live stream free online in HD on BuzzClips TV. Official Free-To-Air broadcast from ${channel.country}.`
+    );
+    const thumbnail = escapeXml(channel.logo || `${baseUrl}/icon-512.png`);
+
+    const tags = isDdSports
+      ? [
+          "dd sports live streaming",
+          "dd sports channel",
+          "dd doordarshan live",
+          "dd sports live",
+          "doordarshan sports",
+          "live cricket streaming free",
+          "free live tv",
+        ]
+      : [
+          `${channel.name.toLowerCase()} live`,
+          `${channel.name.toLowerCase()} live stream`,
+          "free live tv",
+          "fta channels",
+          `${channel.country.toLowerCase()} live tv`,
+        ];
+
+    const tagsXml = tags
+      .map((tag) => `      <video:tag>${escapeXml(tag)}</video:tag>`)
+      .join("\n");
+
+    const alternatesXml = [
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(channelUrl)}" />`,
+      ...SUPPORTED_LANGUAGES.map(
+        (lang) =>
+          `    <xhtml:link rel="alternate" hreflang="${lang.code}" href="${escapeXml(
+            channelUrl
+          )}?hl=${lang.code}" />`
+      ),
+    ].join("\n");
+
+    return `  <url>
+    <loc>${escapeXml(channelUrl)}</loc>
+${alternatesXml}
+    <video:video>
+      <video:thumbnail_loc>${thumbnail}</video:thumbnail_loc>
+      <video:title>${title}</video:title>
+      <video:description>${description}</video:description>
+      <video:content_loc>${escapeXml(channel.streamUrl)}</video:content_loc>
+      <video:player_loc allow_embed="yes">${escapeXml(channelUrl)}</video:player_loc>
+      <video:publication_date>2026-01-01T00:00:00+05:30</video:publication_date>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>yes</video:live>
+      <video:category>${escapeXml(channel.category)}</video:category>
+      <video:uploader info="${baseUrl}/tv">BuzzClips TV</video:uploader>
+${tagsXml}
+    </video:video>
+  </url>`;
+  }).join("\n");
+
+  const allEntries = [liveChannelEntries, videoEntries].filter(Boolean).join("\n");
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${videoEntries}
+${allEntries}
 </urlset>`;
 
   return new Response(xml, {

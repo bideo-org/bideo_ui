@@ -32,7 +32,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { setTheme } = useTheme();
   const { isAuthenticated, isLoaded = true, logout, user } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale, setLocale } = useLanguage();
 
   if (pathname?.startsWith("/embed")) {
     return null;
@@ -165,6 +165,20 @@ export function Navbar() {
               </DropdownMenu>
             )}
           </div>
+
+          {/* Quick Convert to English Button (Visible when on non-English locale) */}
+          {locale !== "en" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocale("en")}
+              className="h-8 px-2.5 rounded-full text-xs font-semibold border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary transition-all cursor-pointer flex items-center gap-1"
+              title="Convert back to English"
+            >
+              <span>English</span>
+              <span className="text-[10px] opacity-70 uppercase">(EN)</span>
+            </Button>
+          )}
 
           {/* Language Switcher */}
           <LanguageSwitcher variant="icon" />

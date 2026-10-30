@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LiveTvClient } from "@/components/tv/LiveTvClient";
 import { ALL_LIVE_CHANNELS } from "@/constants/liveChannels";
 import { SEO_KEYWORD_GROUPS } from "@/constants/seoKeywords";
@@ -10,6 +11,7 @@ import {
   generateBreadcrumbSchema,
   generateChannelListSchema,
   generateLiveTvFaqSchema,
+  generateHreflangAlternates,
 } from "@/utility/seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Radio, Tv, Zap, Sparkles, Globe } from "lucide-react";
@@ -76,6 +78,7 @@ export async function generateMetadata({
     ],
     alternates: {
       canonical: canonicalUrl,
+      languages: generateHreflangAlternates(canonicalUrl),
     },
     openGraph: {
       title,
@@ -104,6 +107,11 @@ export async function generateMetadata({
 
 export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
   const { channel: channelId } = await searchParams;
+
+  if (channelId && ALL_LIVE_CHANNELS.some((c) => c.id === channelId)) {
+    redirect(`/tv/${channelId}`);
+  }
+
   const activeChannel =
     ALL_LIVE_CHANNELS.find((c) => c.id === channelId) ||
     ALL_LIVE_CHANNELS[0];

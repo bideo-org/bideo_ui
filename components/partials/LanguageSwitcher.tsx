@@ -34,12 +34,15 @@ export function LanguageSwitcher({
         {variant === "icon" ? (
           <Button
             variant="outline"
-            size="icon"
-            className={className}
+            size="sm"
+            className={`h-9 px-2 gap-1.5 text-xs font-semibold ${className}`}
             aria-label={t("common.switchLanguage")}
             title={`${t("common.switchLanguage")} (${language.nativeName})`}
           >
-            <Globe className="h-[1.15rem] w-[1.15rem] text-muted-foreground hover:text-foreground transition-colors" />
+            <Globe className="h-[1.1rem] w-[1.1rem] text-muted-foreground hover:text-foreground transition-colors" />
+            <span className="uppercase text-[11px] font-bold tracking-wider text-foreground">
+              {language.code}
+            </span>
           </Button>
         ) : (
           <Button
@@ -60,6 +63,25 @@ export function LanguageSwitcher({
         align="end"
         className="w-56 max-h-[380px] overflow-y-auto scrollbar-thin"
       >
+        {/* Quick Convert to English when viewing in another language */}
+        {locale !== "en" && (
+          <>
+            <DropdownMenuItem
+              onClick={() => setLocale("en")}
+              className="flex items-center justify-between cursor-pointer py-2 px-2 bg-primary/10 text-primary font-semibold hover:bg-primary/20 mb-1 rounded-md"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-base leading-none">🇺🇸</span>
+                <span className="text-xs font-bold">Switch to English</span>
+              </div>
+              <span className="text-[10px] uppercase font-mono px-1 py-0.5 rounded bg-primary/20 font-bold">
+                EN
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+
         {/* Worldwide Top Languages */}
         <DropdownMenuLabel className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1">
           {t("common.worldwide")}

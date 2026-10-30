@@ -76,6 +76,11 @@ describe("SEO & Indexing Infrastructure", () => {
       );
       expect(
         sitemapEntries.some(
+          (e) => e.url === "https://buzzclips.app/tv/dd-sports"
+        )
+      ).toBe(true);
+      expect(
+        sitemapEntries.some(
           (e) => e.url === "https://buzzclips.app/watch/awesome-video"
         )
       ).toBe(true);
@@ -406,6 +411,39 @@ describe("SEO & Indexing Infrastructure", () => {
         expect(perms).toContain("buzz clips live tv");
         expect(perms).toContain("buzzclip live tv");
         expect(perms).toContain("buzz clip live tv");
+      });
+
+      it("generates targeted channel FAQ and brand schemas", async () => {
+        const {
+          generateSingleChannelFaqSchema,
+          generateWebSiteSchema,
+          generateOrganizationSchema,
+        } = await import("@/utility/seo");
+        const { ALL_LIVE_CHANNELS } = await import("@/constants/liveChannels");
+
+        const ddSports = ALL_LIVE_CHANNELS.find((c) => c.id === "dd-sports")!;
+        const faq = generateSingleChannelFaqSchema(ddSports, "https://buzzclips.app");
+
+        expect(faq["@type"]).toBe("FAQPage");
+        expect(faq.mainEntity.length).toBeGreaterThanOrEqual(4);
+        expect(
+          faq.mainEntity.some((q) =>
+            q.name.includes("DD Sports live streaming")
+          )
+        ).toBe(true);
+        expect(
+          faq.mainEntity.some((q) =>
+            q.acceptedAnswer.text.includes("Indian national cricket matches")
+          )
+        ).toBe(true);
+
+        const websiteSchema = generateWebSiteSchema("https://buzzclips.app");
+        expect(websiteSchema.alternateName).toContain("Buzz Clips");
+        expect(websiteSchema.brand.alternateName).toContain("Buzz Clips");
+
+        const orgSchema = generateOrganizationSchema("https://buzzclips.app");
+        expect(orgSchema.alternateName).toContain("Buzz Clips");
+        expect(orgSchema.brand.alternateName).toContain("Buzz Clips");
       });
     });
   });

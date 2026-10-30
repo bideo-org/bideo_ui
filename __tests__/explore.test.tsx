@@ -93,7 +93,9 @@ describe("ExploreClient & SEO Category/Tag Routes", () => {
 
     expect(screen.getByText("Next.js 15 Masterclass")).toBeInTheDocument();
     expect(screen.getByText("Apex Legends Highlights")).toBeInTheDocument();
-    expect(screen.getByText("Explore Videos")).toBeInTheDocument();
+    expect(
+      screen.getByText(/BuzzClips \(Buzz Clips\) - Explore/i)
+    ).toBeInTheDocument();
   });
 
   it("navigates to category route when clicking a category pill", () => {

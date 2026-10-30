@@ -213,7 +213,7 @@ export default function ExploreClient({
                 ? `${CATEGORIES.find((c) => c.value === activeCategory)?.label || activeCategory} Videos`
                 : activeTag
                   ? `Videos tagged #${activeTag}`
-                  : "Explore Videos"}
+                  : "BuzzClips (Buzz Clips) - Explore Trending Videos & Live TV"}
             </h1>
             <p className="text-sm text-muted-foreground">
               Discover, watch, and search videos from creators around the world on BuzzClips.

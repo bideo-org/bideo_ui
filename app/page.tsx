@@ -13,9 +13,9 @@ import { POPULAR_SEO_TOPICS } from "@/constants/seoKeywords";
 export const revalidate = 60; // Incremental Static Regeneration every 60s
 
 export const metadata: Metadata = {
-  title: "BuzzClips - Free Video Streaming Website, Indian TV & Creator Clips",
+  title: "BuzzClips (Buzz Clips) - Free Video Streaming Website, Indian Live TV & Creator Reels",
   description:
-    "Watch free video streaming, Indian TV live, trending viral clips, gaming highlights, tech tutorials, and reels on BuzzClips. Zero-lag adaptive HLS playback with zero buffering.",
+    "Watch free video streaming, Indian TV live, trending viral clips, gaming highlights, tech tutorials, and reels on BuzzClips (Buzz Clips). Fast buffer-free adaptive HLS playback with zero lag.",
   keywords: [
     "video streaming website",
     "free video streaming",
@@ -106,8 +106,8 @@ function ExploreSkeleton() {
 
 const FAQS = [
   {
-    q: "What is BuzzClips?",
-    a: "BuzzClips is a next-generation free video streaming website and creator clip platform that delivers lightning-fast, buffer-free video playback powered by adaptive HLS technology. Viewers can watch trending viral clips, gaming highlights, tech tutorials, and entertainment videos, alongside 12+ official Free-To-Air Indian Live TV channels.",
+    q: "What is BuzzClips (Buzz Clips)?",
+    a: "BuzzClips (also known as Buzz Clips or Buzz Clip) is a next-generation free video streaming website and creator clip platform that delivers lightning-fast, buffer-free video playback powered by adaptive HLS technology. Viewers can watch trending viral clips, gaming highlights, tech tutorials, and entertainment videos, alongside 12+ official Free-To-Air Indian Live TV channels.",
   },
   {
     q: "Can I watch free Indian live TV on BuzzClips?",
